@@ -1,0 +1,340 @@
+Date,Added_Ticker,Added_Security
+"September 30, 2024",AMTM,Amentum
+"September 23, 2024",PLTR,Palantir Technologies
+"September 23, 2024",DELL,Dell Technologies
+"September 23, 2024",ERIE,Erie Indemnity
+"June 24, 2024",KKR,KKR
+"June 24, 2024",CRWD,CrowdStrike
+"June 24, 2024",GDDY,GoDaddy
+"May 8, 2024",VST,Vistra
+"April 2, 2024",GEV,GE Vernova
+"April 1, 2024",SOLV,Solventum
+"March 18, 2024",SMCI,Supermicro
+"March 18, 2024",DECK,Deckers Brands
+"December 18, 2023",UBER,Uber
+"December 18, 2023",JBL,Jabil
+"December 18, 2023",BLDR,Builders FirstSource
+"October 18, 2023",HUBB,Hubbell
+"October 18, 2023",LULU,Lululemon Athletica
+"October 2, 2023",VLTO,Veralto
+"September 18, 2023",BX,Blackstone
+"September 18, 2023",ABNB,Airbnb
+"August 25, 2023",KVUE,Kenvue
+"June 20, 2023",PANW,Palo Alto Networks
+"May 4, 2023",AXON,Axon Enterprise
+"March 20, 2023",FICO,Fair Isaac
+"March 15, 2023",BG,Bunge Global
+"March 15, 2023",PODD,Insulet
+"January 4, 2023",GEHC,GE HealthCare
+"December 22, 2022",STLD,Steel Dynamics
+"December 19, 2022",FSLR,First Solar
+"December 15, 2022",MBC,MasterBrand
+"November 1, 2022",ACGL,Arch Capital Group
+"October 12, 2022",TRGP,Targa Resources
+"October 3, 2022",PCG,PG&E
+"October 3, 2022",EQT,EQT Corporation
+"September 19, 2022",CSGP,CoStar Group
+"September 19, 2022",INVH,Invitation Homes
+"June 21, 2022",KDP,Keurig Dr Pepper
+"June 21, 2022",ON,ON Semiconductor
+"June 8, 2022",VICI,Vici Properties
+"April 4, 2022",CPT,Camden Property Trust
+"March 2, 2022",MOH,Molina Healthcare
+"February 15, 2022",NDSN,Nordson Corporation
+"February 2, 2022",CEG,Constellation Energy
+"December 20, 2021",SBNY,Signature Bank
+"December 20, 2021",SEDG,SolarEdge
+"December 20, 2021",FDS,FactSet
+"December 14, 2021",EPAM,EPAM Systems
+"September 20, 2021",MTCH,Match Group
+"September 20, 2021",CDAY,Ceridian
+"September 20, 2021",BRO,Brown & Brown
+"August 30, 2021",TECH,Bio-Techne
+"July 21, 2021",MRNA,Moderna
+"June 3, 2021",OGN,Organon & Co.
+"May 14, 2021",CRL,Charles River Laboratories
+"April 20, 2021",PTC,PTC
+"March 22, 2021",NXPI,NXP
+"March 22, 2021",PENN,Penn National Gaming
+"March 22, 2021",GNRC,Generac Holdings
+"March 22, 2021",CZR,Caesars Entertainment
+"February 12, 2021",MPWR,Monolithic Power Systems
+"January 21, 2021",TRMB,Trimble
+"January 7, 2021",ENPH,Enphase Energy
+"December 21, 2020",TSLA,Tesla
+"October 9, 2020",VNT,Vontier
+"October 7, 2020",POOL,Pool Corporation
+"September 21, 2020",ETSY,Etsy
+"September 21, 2020",TER,Teradyne
+"September 21, 2020",CTLT,Catalent
+"June 22, 2020",BIO,Bio-Rad Laboratories
+"June 22, 2020",TDY,Teledyne
+"June 22, 2020",TYL,Tyler Technologies
+"May 22, 2020",WST,West Pharmaceutical Services
+"May 12, 2020",DPZ,Domino's Pizza
+"May 12, 2020",DXCM,Dexcom
+"April 3, 2020",OTIS,Otis Worldwide
+"April 3, 2020",CARR,Carrier
+"April 1, 2020",HWM,Howmet Aerospace
+"March 2, 2020",IR,Ingersoll Rand
+"January 28, 2020",PAYC,Paycom
+"December 23, 2019",LYV,Live Nation Entertainment
+"December 23, 2019",ZBRA,Zebra Technologies
+"December 23, 2019",STE,Steris
+"December 9, 2019",ODFL,Old Dominion Freight Line
+"December 5, 2019",WRB,W. R. Berkley Corporation
+"November 21, 2019",NOW,ServiceNow
+"October 3, 2019",LVS,Las Vegas Sands
+"September 26, 2019",NVR,NVR
+"September 23, 2019",CDW,CDW
+"August 9, 2019",LDOS,Leidos
+"August 9, 2019",IEX,IDEX Corporation
+"July 15, 2019",TMUS,T-Mobile US
+"July 1, 2019",MKTX,MarketAxess
+"June 11, 2019",AMCR,Amcor
+"June 7, 2019",BMS,Bemis
+"June 3, 2019",DD,DuPont
+"June 3, 2019",CTVA,Corteva
+"April 2, 2019",DOW,Dow
+"February 27, 2019",WAB,Wabtec
+"February 15, 2019",ATO,Atmos Energy
+"January 18, 2019",TFX,Teleflex
+"January 2, 2019",FRC,First Republic Bank
+"December 24, 2018",CE,Celanese
+"December 3, 2018",LW,Lamb Weston
+"December 3, 2018",MXIM,Maxim Integrated
+"December 3, 2018",FANG,Diamondback Energy
+"November 13, 2018",JKHY,Jack Henry & Associates
+"November 6, 2018",KEYS,Keysight
+"October 11, 2018",FTNT,Fortinet
+"October 1, 2018",ROL,Rollins
+"September 14, 2018",WCG,WellCare
+"August 28, 2018",ANET,Arista Networks
+"July 2, 2018",CPRT,Copart
+"June 20, 2018",FLT,FleetCor Technologies
+"June 18, 2018",BR,Broadridge Financial Solutions
+"June 18, 2018",HFC,HollyFrontier
+"June 7, 2018",TWTR,Twitter
+"June 5, 2018",EVRG,Evergy
+"May 31, 2018",ABMD,Abiomed
+"April 4, 2018",MSCI,MSCI
+"March 19, 2018",TTWO,Take-Two Interactive
+"March 19, 2018",SIVB,SVB Financial Group
+"March 19, 2018",NKTR,Nektar Therapeutics
+"March 7, 2018",IPGP,IPG Photonics
+"January 3, 2018",HII,Huntington Ingalls Industries
+"October 13, 2017",NCLH,Norwegian Cruise Line Holdings
+"September 18, 2017",CDNS,Cadence Design Systems
+"September 1, 2017",DWDP,DuPont
+"September 1, 2017",SBAC,SBA Communications
+"August 29, 2017",Q,QuintilesIMS
+"August 8, 2017",BHF,Brighthouse Financial
+"July 26, 2017",DRE,Duke Realty Corp
+"July 26, 2017",AOS,A. O. Smith
+"July 26, 2017",PKG,Packaging Corporation of America
+"July 26, 2017",RMD,ResMed
+"July 26, 2017",MGM,MGM Resorts International
+"June 19, 2017",HLT,Hilton
+"June 19, 2017",ALGN,Align Technology
+"June 19, 2017",ANSS,Ansys
+"June 19, 2017",RE,Everest Re
+"June 2, 2017",INFO,IHS Markit
+"April 5, 2017",IT,Gartner
+"April 4, 2017",DXC,DXC Technology
+"March 20, 2017",AMD,Advanced Micro Devices
+"March 20, 2017",RJF,Raymond James Financial
+"March 20, 2017",ARE,Alexandria Real Estate Equities
+"March 16, 2017",SNPS,Synopsys
+"March 13, 2017",DISH,Dish Network
+"March 2, 2017",REG,Regency Centers
+"March 1, 2017",CBOE,Cboe Holdings
+"February 28, 2017",INCY,Incyte
+"January 5, 2017",IDXX,Idexx Laboratories
+"December 19, 2016",AGN,Allergan
+"December 2, 2016",MAA,Mid-America Apartments
+"December 2, 2016",EVHC,Envision Healthcare
+"November 1, 2016",ARNC,Arconic
+"September 30, 2016",COTY,Coty
+"September 22, 2016",COO,The Cooper Companies
+"September 8, 2016",CHTR,Charter Communications
+"September 6, 2016",MTD,Mettler Toledo
+"July 5, 2016",FTV,Fortive Corp
+"July 1, 2016",LNT,Alliant Energy Corp
+"July 1, 2016",ALB,Albemarle Corporation
+"June 22, 2016",FBHS,Fortune Brands Home & Security
+"June 3, 2016",TDG,TransDigm Group
+"May 31, 2016",AJG,Arthur J. Gallagher & Co.
+"May 23, 2016",LKQ,LKQ Corporation
+"May 18, 2016",DLR,Digital Realty
+"May 13, 2016",ALK,Alaska Air Group
+"May 3, 2016",AYI,Acuity Brands
+"April 25, 2016",GPN,Global Payments
+"April 18, 2016",ULTA,Ulta Beauty
+"April 8, 2016",UA,Under Armour (Class C)
+"April 4, 2016",FL,Foot Locker
+"March 30, 2016",HOLX,Hologic
+"March 30, 2016",CNC,Centene Corporation
+"March 7, 2016",UDR,UDR
+"March 4, 2016",AWK,American Water Works
+"February 22, 2016",CXO,Concho Resources
+"February 1, 2016",CFG,Citizens
+"February 1, 2016",FRT,Federal Realty Investment Trust
+"January 19, 2016",EXR,Extra Space Storage
+"January 5, 2016",WLTW,Willis Towers Watson
+"December 29, 2015",CHD,Church & Dwight
+"December 1, 2015",CSRA,CSRA
+"November 19, 2015",ILMN,Illumina
+"November 18, 2015",SYF,Synchrony Financial
+"November 2, 2015",HPE,Hewlett Packard Enterprise
+"October 7, 2015",VRSK,Verisk Analytics
+"September 18, 2015",CMCSK,Comcast Class K Special
+"September 18, 2015",FOX,Twenty-First Century Fox Class B
+"September 18, 2015",NWS,News Corporation Class B
+"September 2, 2015",UAL,United Continental Holdings
+"August 28, 2015",ATVI,Activision Blizzard
+"July 29, 2015",SIG,Signet Jewelers
+"July 20, 2015",PYPL,PayPal
+"July 8, 2015",AAP,Advance Auto Parts
+"July 6, 2015",KHC,Kraft Heinz
+"July 2, 2015",CPGX,Columbia Pipeline Group
+"July 1, 2015",JBHT,J.B. Hunt
+"July 1, 2015",BXLT,Baxalta
+"June 11, 2015",QRVO,Qorvo
+"April 7, 2015",O,Realty Income Corporation
+"March 23, 2015",AAL,American Airlines Group
+"March 23, 2015",EQIX,Equinix
+"March 23, 2015",SLG,SL Green Realty
+"March 23, 2015",HBI,Hanesbrands
+"March 18, 2015",HSIC,Henry Schein
+"March 12, 2015",SWKS,Skyworks
+"January 27, 2015",HCA,HCA Holdings
+"January 27, 2015",ENDP,Endo International
+"December 5, 2014",RCL,Royal Caribbean Cruises
+"November 5, 2014",LVLT,Level 3 Communications
+"September 20, 2014",URI,United Rentals
+"September 20, 2014",UHS,Universal Health Services
+"August 18, 2014",MNK,Mallinckrodt
+"August 6, 2014",DISCK,Discovery Communications
+"July 2, 2014",MLM,Martin Marietta
+"July 1, 2014",AMG,Affiliated Managers Group
+"June 20, 2014",XEC,Cimarex Energy
+"May 8, 2014",AVGO,Avago Technologies
+"May 1, 2014",UA,Under Armour
+"May 1, 2014",NAVI,Navient
+"April 3, 2014",GOOGL,Google
+"April 2, 2014",ESS,Essex Property Trust
+"March 21, 2014",GMCR,Keurig Green Mountain
+"January 24, 2014",TSCO,Tractor Supply
+"December 23, 2013",ADS,Alliance Data Systems
+"December 23, 2013",MHK,Mohawk Industries
+"December 23, 2013",FB,Facebook
+"December 10, 2013",GGP,General Growth Properties
+"December 2, 2013",ALLE,Allegion
+"November 13, 2013",KORS,Michael Kors
+"October 29, 2013",RIG,Transocean
+"September 20, 2013",VRTX,Vertex Pharmaceuticals
+"September 20, 2013",AME,Ametek
+"September 10, 2013",DAL,Delta Air Lines
+"July 8, 2013",NLSN,Nielsen Holdings
+"July 1, 2013",NWSA,21st Century Fox
+"June 21, 2013",ZTS,Zoetis
+"June 6, 2013",GM,General Motors
+"May 23, 2013",KSU,Kansas City Southern
+"May 8, 2013",MAC,Macerich
+"April 30, 2013",REGN,Regeneron Pharmaceuticals
+"February 15, 2013",PVH,PVH
+"January 2, 2013",ABBV,AbbVie
+"December 21, 2012",DLPH,Delphi Automotive
+"December 11, 2012",GRMN,Garmin
+"December 3, 2012",DG,Dollar General
+"October 10, 2012",PETM,PetSmart
+"October 2, 2012",KRFT,Kraft Foods
+"October 1, 2012",ADT,ADT
+"October 1, 2012",PNR,Pentair
+"September 5, 2012",LYB,LyondellBasell
+"July 31, 2012",ESV,Ensco
+"July 2, 2012",STX,Seagate Technology
+"June 29, 2012",MNST,Monster Beverage
+"June 5, 2012",LRCX,Lam Research
+"May 21, 2012",ALXN,Alexion Pharmaceuticals
+"May 17, 2012",KMI,Kinder Morgan
+"April 23, 2012",PSX,Phillips 66
+"April 3, 2012",FOSL,Fossil
+"March 13, 2012",CCI,Crown Castle
+"December 31, 2011",WPX,WPX Energy
+"December 20, 2011",TRIP,TripAdvisor
+"December 16, 2011",BWA,BorgWarner
+"December 16, 2011",PRGO,Perrigo
+"December 16, 2011",DLTR,Dollar Tree
+"December 12, 2011",GAS,AGL Resources.
+"November 18, 2011",CBE,Cooper Industries
+"October 31, 2011",XYL,Xylem
+"October 14, 2011",TEL,TE Connectivity
+"September 23, 2011",MOS,The Mosaic Company
+"July 5, 2011",ACN,Accenture
+"June 30, 2011",MPC,Marathon Oil
+"June 1, 2011",ANR,Alpha Natural Resources
+"April 27, 2011",CMG,Chipotle Mexican Grill
+"April 1, 2011",BLK,BlackRock
+"March 31, 2011",EW,Edwards Lifesciences
+"February 28, 2011",COV,Covidien
+"February 25, 2011",JOYG,Joy Global
+"December 17, 2010",CVC,Cablevision
+"December 17, 2010",FFIV,F5 Networks
+"December 17, 2010",NFLX,Netflix
+"December 17, 2010",NFX,Newfield Exploration
+"November 17, 2010",IR,Ingersoll-Rand
+"August 26, 2010",TYC,Tyco International
+"July 14, 2010",CB,Chubb
+"June 30, 2010",QEP,QEP Resources
+"June 28, 2010",KMX,CarMax
+"April 29, 2010",CERN,Cerner
+"February 26, 2010",HP,Helmerich & Payne
+"December 18, 2009",V,Visa
+"December 18, 2009",MJN,Mead Johnson Nutrition
+"December 18, 2009",CLF,Cliffs Natural Resources
+"December 18, 2009",SAI,SAIC
+"December 18, 2009",ROST,Ross Stores
+"November 3, 2009",PCLN,Priceline.com
+"September 28, 2009",ARG,Airgas
+"August 19, 2009",FMC,FMC Corporation
+"June 29, 2009",PCS,MetroPCS
+"June 5, 2009",FTI,FMC Technologies
+"March 3, 2009",HRL,Hormel Foods
+"March 3, 2009",VTR,Ventas
+"December 31, 2008",OI,Owens-Illinois
+"September 16, 2008",HRS,Harris Corporation
+"September 12, 2008",CRM,Salesforce
+"September 12, 2008",FAST,Fastenal
+"July 1, 2008",AKS,AK Steel
+"June 23, 2008",COG,Cabot Oil & Gas
+"June 23, 2008",MEE,Massey Energy
+"June 10, 2008",LO,Lorillard Tobacco Company
+"December 20, 2007",RRC,Range Resources
+"December 13, 2007",GME,GameStop
+"October 26, 2007",JEC,Jacobs Engineering Group
+"October 2, 2007",EXPE,Expedia
+"October 1, 2007",TDC,Teradata
+"September 27, 2007",TSO,Tesoro Corporation
+"September 26, 2007",ICE,Intercontinental Exchange
+"August 24, 2007",LUK,Leucadia National
+"July 2, 2007",DFS,Discover Financial Services
+"March 30, 2007",KFT,Kraft Foods
+"January 10, 2007",AVB,AvalonBay Communities
+"June 2, 2006",JNPR,Juniper Networks
+"November 18, 2005",AMZN,Amazon
+"July 1, 2005",STZ,Constellation Brands
+"September 25, 2003",ESRX,Express Scripts
+"December 5, 2000",INTU,Intuit
+"December 5, 2000",SBL,Symbol Technologies
+"December 5, 2000",AYE,Allegheny Energy
+"December 5, 2000",ABK,Ambac Financial
+"July 27, 2000",JDSU,JDS Uniphase
+"June 12, 2000",CVG,Convergys
+"June 7, 2000",SBUX,Starbucks
+"December 8, 1999",YHOO,Yahoo!
+"June 9, 1999",WLP,Wellpoint
+"December 11, 1998",FSR,Firstar
+"December 11, 1998",CCL,Carnival Corp.
+"December 11, 1998",CPWR,Compuware
+"June 17, 1997",CCI,Countrywide Credit Industries
