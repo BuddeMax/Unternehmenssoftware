@@ -62,7 +62,7 @@ class StockLSTM(nn.Module):
 input_size = 5
 hidden_size = 128  # Erhöhte Hidden-Size
 output_size = 1
-num_layers = 3  # Mehrere LSTM-Schichten
+num_layers = 4  # Mehrere LSTM-Schichten
 
 model = StockLSTM(input_size, hidden_size, output_size, num_layers)
 criterion = nn.SmoothL1Loss()  # Robuster gegenüber Ausreißern
