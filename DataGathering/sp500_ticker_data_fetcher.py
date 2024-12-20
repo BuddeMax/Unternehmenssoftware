@@ -36,13 +36,26 @@ def download_ticker_data(ticker, start_date, end_date, max_retries=5):
     print(f"Fehler: Daten für {ticker} konnten nach {max_retries} Versuchen nicht abgerufen werden.")
     return None
 
+
+
 # Hauptfunktion
 def main():
-    # CSV-Pfad mit aktuellen Tickersymbolen
-    csv_path = r"C:\Users\b_mas\PycharmProjects\Unternehmenssoftware\sp500_data\sp500_current_members.csv"
+    # Verzeichnis des aktuellen Skripts abrufen
+    base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Speicherort für die endgültige CSV
-    output_file = r"C:\Users\b_mas\PycharmProjects\Unternehmenssoftware\sp500_data\sp500_historical_data_current_members.csv"
+    # Dynamischer CSV-Pfad mit aktuellen Tickersymbolen
+    csv_path = os.path.join(base_dir, "../sp500_data", "sp500_current_members.csv")
+
+    # Dynamischer Speicherort für die endgültige CSV
+    output_file = os.path.join(base_dir, "sp500_data", "sp500_historical_data_current_members.csv")
+
+    # Sicherstellen, dass das Ausgabe-Verzeichnis existiert
+    output_dir = os.path.dirname(output_file)
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Optional: Sicherstellen, dass das Eingabe-Verzeichnis existiert
+    input_dir = os.path.dirname(csv_path)
+    os.makedirs(input_dir, exist_ok=True)
 
     # Ticker laden
     tickers = load_sp500_tickers_from_csv(csv_path)
