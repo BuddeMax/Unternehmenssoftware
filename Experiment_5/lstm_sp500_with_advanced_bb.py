@@ -1,0 +1,256 @@
+import os
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, TensorDataset
+
+# 1. Daten laden
+def lade_daten(bollinger_pfad=None, normal_pfad=None):
+    if bollinger_pfad is None:
+        bollinger_pfad = os.path.join(
+            os.path.expanduser('~'),
+            'Unternehmenssoftware/shared_resources/sp500_data/BollingerBands/SP500_Index_Historical_Data_with_BB.csv'
+        )
+    if normal_pfad is None:
+        normal_pfad = os.path.join(
+            os.path.expanduser('~'),
+            'Unternehmenssoftware/shared_resources/sp500_data/BollingerBands/Final_Bollinger_Stats.csv'
+        )
+
+    # Überprüfen, ob die Dateien existieren
+    if not os.path.exists(bollinger_pfad):
+        raise FileNotFoundError(f"Die Bollinger Bands Datei wurde nicht gefunden: {bollinger_pfad}")
+    if not os.path.exists(normal_pfad):
+        raise FileNotFoundError(f"Die normale Daten Datei wurde nicht gefunden: {normal_pfad}")
+
+    # Daten laden
+    bollinger_daten = pd.read_csv(bollinger_pfad, parse_dates=['Date'])
+    normal_daten = pd.read_csv(normal_pfad, parse_dates=['Date'])
+
+    # Daten zusammenführen mit spezifischen Suffixen, um überlappende Spalten zu kennzeichnen
+    daten = pd.merge(normal_daten, bollinger_daten, on='Date', how='left', suffixes=('_normal', '_bb'))
+
+    # Sortieren nach Datum
+    daten.sort_values('Date', inplace=True)
+    daten.reset_index(drop=True, inplace=True)
+
+    # Fehlende Werte behandeln (z.B. entfernen oder auffüllen)
+    # Hier entfernen wir Zeilen mit fehlenden Werten
+    daten.dropna(inplace=True)
+
+    # Optional: Überprüfen Sie die Spaltennamen nach dem Merge
+    print("Spalten nach dem Merge:", daten.columns.tolist())
+
+    # Entscheiden Sie, welche 'Volume' Spalte verwendet werden soll
+    # Hier behalten wir 'Volume_normal' und entfernen 'Volume_bb', falls vorhanden
+    if 'Volume_bb' in daten.columns:
+        daten.drop('Volume_bb', axis=1, inplace=True)
+
+    return daten
+
+# 2. Daten vorbereiten
+def bereite_daten_vor(daten, spalten=None, sequenz_länge=60):
+    if spalten is None:
+        # Wählen Sie die gewünschten Spalten aus
+        spalten = ['Open', 'High', 'Low', 'Close', 'Volume_normal',
+                   'BB_Middle', 'BB_Upper', 'BB_Lower']
+
+    # Überprüfen, ob alle gewünschten Spalten vorhanden sind
+    fehlende_spalten = [spalte for spalte in spalten if spalte not in daten.columns]
+    if fehlende_spalten:
+        raise KeyError(f"Die folgenden Spalten fehlen im Datensatz: {fehlende_spalten}")
+
+    # Daten skalieren zwischen 0 und 1
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    skaliert = scaler.fit_transform(daten[spalten].values)
+
+    X, y = [], []
+    for i in range(sequenz_länge, len(skaliert)):
+        X.append(skaliert[i - sequenz_länge:i])  # Eingabesequenz
+        y.append(skaliert[i, 3])  # 3=Close Zielwert (Close-Preis)
+
+    X, y = np.array(X), np.array(y)
+
+    # Daten in Training und Test aufteilen (80% Training, 20% Test)
+    training = int(0.8 * len(X))
+    X_train, X_test = X[:training], X[training:]
+    y_train, y_test = y[:training], y[training:]
+
+    # Testdaten-Dates extrahieren
+    test_dates = daten['Date'].iloc[sequenz_länge + training:].reset_index(drop=True)
+
+    # In Torch-Tensoren umwandeln
+    X_train = torch.tensor(X_train, dtype=torch.float32)
+    y_train = torch.tensor(y_train, dtype=torch.float32).unsqueeze(1)
+    X_test = torch.tensor(X_test, dtype=torch.float32)
+    y_test = torch.tensor(y_test, dtype=torch.float32).unsqueeze(1)
+
+    return X_train, y_train, X_test, y_test, scaler, test_dates
+
+# 3. Einfaches LSTM-Modell definieren
+class EinfachesLSTM(nn.Module):
+    def __init__(self, input_dim=8, hidden_dim=50, output_dim=1, num_layers=2):
+        super(EinfachesLSTM, self).__init__()
+        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x):
+        out, _ = self.lstm(x)  # LSTM-Schicht durchlaufen
+        out = out[:, -1, :]  # Letzten Zeitschritt nehmen
+        out = self.fc(out)  # Ausgabe durch die vollverbundene Schicht
+        return out
+
+# 4. Modell trainieren
+def trainiere_modell(modell, daten_loader, verlustfunktion, optimierer, gerät, epochen=100):
+    verlust_werte = []
+    for epoch in range(epochen):
+        modell.train()
+        gesamt_verlust = 0
+        for inputs, labels in daten_loader:
+            inputs, labels = inputs.to(gerät), labels.to(gerät)
+
+            optimierer.zero_grad()  # Gradienten zurücksetzen
+            vorhersage = modell(inputs)  # Vorhersage berechnen
+            verlust = verlustfunktion(vorhersage, labels)  # Verlust berechnen
+            verlust.backward()  # Rückwärtsdurchlauf (Gradienten berechnen)
+            optimierer.step()  # Gewichte aktualisieren
+
+            gesamt_verlust += verlust.item() * inputs.size(0)
+
+        durchschnitt_verlust = gesamt_verlust / len(daten_loader.dataset)
+        verlust_werte.append(durchschnitt_verlust)
+
+        # Alle 10 Epochen den Verlust anzeigen
+        if (epoch + 1) % 10 == 0 or epoch == 0:
+            print(f'Epoche {epoch + 1}/{epochen}, Verlust: {durchschnitt_verlust:.6f}')
+
+    return verlust_werte
+
+# 5. Modell testen
+def teste_modell(modell, daten_loader, scaler, gerät, test_dates, speicher_pfad='ergebnisse.csv'):
+    modell.eval()  # Modell in den Evaluierungsmodus setzen
+    vorhersagen, tatsächliche = [], []
+
+    with torch.no_grad():  # Kein Gradientenberechnung
+        for inputs, labels in daten_loader:
+            inputs, labels = inputs.to(gerät), labels.to(gerät)
+            outputs = modell(inputs)  # Vorhersage berechnen
+            vorhersagen.append(outputs.cpu().numpy())
+            tatsächliche.append(labels.cpu().numpy())
+
+    vorhersagen = np.concatenate(vorhersagen).flatten()
+    tatsächliche = np.concatenate(tatsächliche).flatten()
+
+    # Daten denormalisieren (zurückskalieren)
+    # Wir skalieren nur den 'Close' Preis zurück
+    close_scaler = MinMaxScaler()
+    close_scaler.min_, close_scaler.scale_ = scaler.min_[3], scaler.scale_[3]
+
+    vorhersagen_denorm = vorhersagen / close_scaler.scale_ + close_scaler.min_
+    tatsächliche_denorm = tatsächliche / close_scaler.scale_ + close_scaler.min_
+
+    # Differenz berechnen
+    differenz = vorhersagen_denorm - tatsächliche_denorm
+
+    # Ergebnisse plotten
+    plt.figure(figsize=(12, 6))
+    plt.plot(tatsächliche_denorm, label='Tatsächlicher Close Preis')
+    plt.plot(vorhersagen_denorm, label='Vorhergesagter Close Preis')
+    plt.xlabel('Zeit')
+    plt.ylabel('S&P 500 Close Preis')
+    plt.title('Tatsächlicher vs. Vorhergesagter S&P 500 Close Preis')
+    plt.legend()
+    plt.show()
+
+    # RMSE berechnen (Root Mean Square Error)
+    rmse = np.sqrt(np.mean((vorhersagen_denorm - tatsächliche_denorm) ** 2))
+    print(f'RMSE auf Testdaten: {rmse:.2f}')
+
+    # Ergebnisse in einem DataFrame zusammenfassen
+    ergebnisse = pd.DataFrame({
+        'Date': test_dates,
+        'Vorhergesagt': vorhersagen_denorm,
+        'Tatsächlich': tatsächliche_denorm,
+        'Differenz': differenz
+    })
+
+    # CSV speichern
+    ergebnisse.to_csv(speicher_pfad, index=False)
+    print(f'Ergebnisse wurden in {speicher_pfad} gespeichert.')
+
+    return vorhersagen_denorm, tatsächliche_denorm, differenz
+
+# 6. Hauptfunktion
+def haupt():
+    # Schritt 1: Daten laden
+    print("Daten werden geladen...")
+    bollinger_pfad = '/Users/maxbudde/Unternehmenssoftware/sp500_data/BollingerBands/SP500_Index_Historical_Data_with_BB.csv'
+    normal_pfad = '/Users/maxbudde/Unternehmenssoftware/sp500_data/BollingerBands/Final_Bollinger_Stats.csv'
+    daten = lade_daten(bollinger_pfad, normal_pfad)
+    print(f"Daten erfolgreich geladen. Gesamtanzahl der Datenpunkte: {len(daten)}")
+
+    # Schritt 2: Daten vorbereiten
+    print("Daten werden vorbereitet...")
+    sequenz_länge = 60
+    spalten = ['Open', 'High', 'Low', 'Close', 'Volume_normal',
+               'BB_Middle', 'BB_Upper', 'BB_Lower']
+    X_train, y_train, X_test, y_test, scaler, test_dates = bereite_daten_vor(daten, spalten=spalten, sequenz_länge=sequenz_länge)
+    print("Daten erfolgreich vorbereitet.")
+
+    # Schritt 3: Modell erstellen
+    print("Erstelle das LSTM-Modell...")
+    input_dim = X_train.shape[2]  # Anzahl der Features
+    modell = EinfachesLSTM(input_dim=input_dim)
+    print(f"Modell erfolgreich erstellt mit input_dim={input_dim}.")
+
+    # Schritt 4: Hyperparameter festlegen
+    epochen = 100
+    batch_größe = 64
+    lernrate = 0.001
+    print(f"Hyperparameter festgelegt: Epochen={epochen}, Batch-Größe={batch_größe}, Lernrate={lernrate}")
+
+    # Schritt 5: DataLoader erstellen
+    print("Erstelle DataLoader für Trainings- und Testdaten...")
+    train_dataset = TensorDataset(X_train, y_train)
+    train_loader = DataLoader(train_dataset, batch_size=batch_größe, shuffle=True)
+
+    test_dataset = TensorDataset(X_test, y_test)
+    test_loader = DataLoader(test_dataset, batch_size=batch_größe, shuffle=False)
+    print("DataLoader erfolgreich erstellt.")
+
+    # Schritt 6: Gerät auswählen
+    gerät = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Verwende Gerät: {gerät}")
+    modell.to(gerät)
+
+    # Schritt 7: Verlustfunktion und Optimierer definieren
+    verlustfunktion = nn.MSELoss()
+    optimierer = torch.optim.Adam(modell.parameters(), lr=lernrate)
+    print("Verlustfunktion und Optimierer definiert.")
+
+    # Schritt 8: Modell trainieren
+    print("Starte das Training des Modells...")
+    verlust_werte = trainiere_modell(modell, train_loader, verlustfunktion, optimierer, gerät, epochen=epochen)
+    print("Training abgeschlossen.")
+
+    # Schritt 9: Verlustkurve plotten
+    plt.figure(figsize=(10, 5))
+    plt.plot(range(1, epochen + 1), verlust_werte, label='Training Verlust')
+    plt.xlabel('Epoche')
+    plt.ylabel('MSE Verlust')
+    plt.title('Training Verlust über Epochen')
+    plt.legend()
+    plt.show()
+
+    # Schritt 10: Modell testen
+    print("Teste das Modell mit den Testdaten...")
+    speicher_pfad = 'ergebnisse.csv'  # Pfad zur Speicherung der Ergebnisse
+    teste_modell(modell, test_loader, scaler, gerät, test_dates, speicher_pfad=speicher_pfad)
+    print("Modell erfolgreich getestet.")
+
+# 7. Programm starten
+if __name__ == "__main__":
+    haupt()
