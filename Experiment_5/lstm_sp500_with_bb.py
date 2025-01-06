@@ -315,7 +315,7 @@ def teste_modell(modell, daten_loader, scaler, gerät, dates_test=None):
         })
 
     # CSV speichern
-    csv_pfad = 'lstm_sp500_bb.csv'
+    csv_pfad = 'lstm_sp500_with_bb.csv'
     if os.path.dirname(csv_pfad):
         os.makedirs(os.path.dirname(csv_pfad), exist_ok=True)
     df_result.to_csv(csv_pfad, index=False)
