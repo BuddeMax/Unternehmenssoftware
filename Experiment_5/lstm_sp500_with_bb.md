@@ -31,3 +31,5 @@ Die Vorhersagen und tatsächlichen Werte wurden in lstm_sp500_bb.csv gespeichert
 ✅ Modell erfolgreich getestet und Ergebnisse visualisiert.
 
 Process finished with exit code 0
+
+Durchschnittliche prozentuale Abweichung: 2.89%

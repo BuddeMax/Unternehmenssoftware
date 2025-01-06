@@ -30,3 +30,5 @@ Ergebnisse wurden in ergebnisse.csv gespeichert.
 Modell erfolgreich getestet.
 
 Process finished with exit code 0
+
+Durchschnittliche prozentuale Abweichung: 2.72%
