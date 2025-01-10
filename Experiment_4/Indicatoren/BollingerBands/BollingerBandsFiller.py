@@ -329,7 +329,7 @@ def run_main():
 
     try:
         # Lade die CSV-Dateien
-        bollinger_df = load_data("bollinger_bands.csv")
+        bollinger_df = load_data("bollinger_bands_2.csv")
         historical_df = load_data("SP500_Index_Historical_Data.csv")
 
         # Zusammenführen der DataFrames auf 'Date'

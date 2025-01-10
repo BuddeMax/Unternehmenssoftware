@@ -32,11 +32,11 @@ def load_data(file_name):
 
 
 # -------------------------------------------------------------------------
-# Klasse zur Erstellung der Bollinger_bands_touches.csv
+# Klasse zur Erstellung der Bollinger_bands_touches_2.csv
 # -------------------------------------------------------------------------
 class BollingerBandsTouchCreator:
     """
-    Diese Klasse erstellt die 'Bollinger_bands_touches.csv' Datei, die für jedes Datum
+    Diese Klasse erstellt die 'Bollinger_bands_touches_2.csv' Datei, die für jedes Datum
     die Anzahl der aufeinanderfolgenden Berührungen der oberen, mittleren und
     unteren Bollinger-Bänder enthält.
     """
@@ -67,9 +67,9 @@ class BollingerBandsTouchCreator:
         self.merged_df.sort_values(by='Date', inplace=True)
         self.merged_df.reset_index(drop=True, inplace=True)
 
-    def create_touches_csv(self, output_file: str = "Bollinger_bands_touches.csv"):
+    def create_touches_csv(self, output_file: str = "Bollinger_bands_touches_2.csv"):
         """
-        Erstellt die CSV-Datei 'Bollinger_bands_touches.csv', die für jedes Datum
+        Erstellt die CSV-Datei 'Bollinger_bands_touches_2.csv', die für jedes Datum
         die Anzahl der aufeinanderfolgenden Berührungen der oberen, mittleren und
         unteren Bollinger-Bänder enthält.
 
@@ -153,7 +153,7 @@ class BollingerBandsTouchCreator:
 # -------------------------------------------------------------------------
 def main():
     # CSV-Dateien aus dem Projekt laden
-    bollinger_df = load_data("bollinger_bands.csv")
+    bollinger_df = load_data("bollinger_bands_2.csv")
     historical_df = load_data("SP500_Index_Historical_Data.csv")
 
     # Instanz der Klasse erstellen
@@ -166,7 +166,7 @@ def main():
     # CSV-Erstellung anstoßen
     touch_creator.create_touches_csv()
 
-    print("Bollinger_bands_touches.csv wurde erfolgreich erstellt.")
+    print("Bollinger_bands_touches_2.csv wurde erfolgreich erstellt.")
 
 
 if __name__ == "__main__":

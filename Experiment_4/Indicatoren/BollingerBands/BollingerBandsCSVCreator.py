@@ -173,7 +173,7 @@ class BollingerBandsCSVCreator:
 # -------------------------------------------------------------------------
 if __name__ == "__main__":
     # CSV-Dateien aus dem Projekt laden
-    bollinger_df = load_data("bollinger_bands.csv")
+    bollinger_df = load_data("bollinger_bands_2.csv")
     historical_df = load_data("SP500_Index_Historical_Data.csv")
 
     # Instanz der Klasse erstellen
