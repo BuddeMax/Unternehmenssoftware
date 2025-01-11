@@ -1,9 +1,11 @@
-# 📊 SP500 Open-Preis-Vorhersage mit LSTM
+📊 SP500 Open-Preis-Vorhersage mit LSTM
 
-## 📝 **Kurzbeschreibung**
-Dieses Teilprojekt konzentriert sich auf die Vorhersage des Open-Preises des S&P 500 Index mithilfe eines **Long Short-Term Memory (LSTM)**-Modells. 
-Ziel ist es, mithilfe von historischen Finanzdaten zukünftige Open-Preise präzise vorherzusagen. Als Ausgangspunkt haben wir das LTSM genommen aus 
-dem Experiment 1 und noch einige kleine Anpassungen vorgenommen.
+📝 Kurzbeschreibung
+
+Dieses Teilprojekt konzentriert sich auf die Vorhersage des Open-Preises des S&P 500 Index mithilfe eines Long Short-Term 
+Memory (LSTM)-Modells. Ziel ist es, mithilfe historischer Finanzdaten zukünftige Open-Preise präzise vorherzusagen. 
+Das Modell basiert auf einem bestehenden LSTM-Ansatz, der im Rahmen von Experiment 1 entwickelt wurde, 
+und wurde für diese Analyse weiter optimiert.
 
 ---
 
@@ -27,53 +29,67 @@ dem Experiment 1 und noch einige kleine Anpassungen vorgenommen.
 
 ## 📊 **Merkmale**
 - **Eingabe-Features:**
-  - Open: Eröffnungspreis
-  - High: Höchstpreis
-  - Low: Tiefstpreis
   - Close: Schlusskurs
-  - Volume: Handelsvolumen
 - **Zielvariable:**
-  - Open-Preis für den nächsten Tag
+  - Close-Preis für den nächsten Tag
 
 ---
 
 ## 🛠️ **Modellarchitektur**
 - **Modelltyp:** LSTM
 - **Parameter:**
-  - Eingabefunktionen: 5
-  - Hidden-Size: 50
+  - Eingabefunktionen: 1 (Close-Preis)
+  - Hidden-Size: 100
   - Anzahl der Schichten: 2
   - Dropout: Nicht verwendet
-  - Verlustfunktion: **MSELoss (Mean Squared Error Loss)**
+  - Verlustfunktion: **Mean Squared Error Loss (MSELoss)**
   - Optimierer: **Adam**
   - Lernrate: 0.001
   - Epochen: 100
   - Batch-Größe: 64
-- **Ziel:** Vorhersage des Open-Preises basierend auf den vorherigen 60 Tagen
+  - Gradient Clipping: 1.0 (zur Stabilisierung des Trainings)
+- **Zeithorizont:** 60 Tage historischer Daten als Eingabe zur Vorhersage des nächsten Open-Preises
 
 ---
 
 ## 📈 **Leistungskriterien**
-- **Trainingsverlust:** Über die Epochen hinweg überwacht
+- **Trainingsverlust:** Verlustfunktion über die Epochen hinweg überwacht
 - **Testverlust (MSE):** Bewertet auf unbekannten Daten
 - **Visualisierung:** Tatsächliche vs. vorhergesagte Open-Preise
 - **Leistungsmetriken:**
-  - **RMSE:** 80.52
-  - **MAE:** 47.32
-  - **MAPE:** 1.08%
+  - **Root Mean Squared Error (RMSE):** Abhängig vom Experiment (siehe Ergebnisse)
+  - **Mean Absolute Error (MAE):** Abhängig vom Experiment (siehe Ergebnisse)
+  - **Mean Absolute Percentage Error (MAPE):** Variiert je nach Durchlauf (0.81–0.90 % für Training, 1.26–1.53 % für Test)
 
 ---
 
-## 🚀 **Ausgangspunkt**
-Als Ausgangspunkt wurde ein Standard-LSTM-Modell mit zwei LSTM-Schichten und einer vollständig verbundenen Schicht verwendet. Das Modell konnte die komplexen zeitlichen Muster der Finanzdaten effektiv erfassen.
+## 🚀 **Ergebnisse**
+
+### **Trainings- und Validierungsverlauf**
+Hier sind die Ergebnisse von fünf Modell-Durchläufen zusammengefasst:
+
+| Experiment | Training Loss (Ende) | Validation Loss (Ende) | MAPE Training | MAPE Test  |
+|------------|-----------------------|------------------------|---------------|------------|
+| 1          | 0.000029             | 0.001563              | 0.84 %        | 1.26 %     |
+| 2          | 0.000029             | 0.001563              | 0.84 %        | 1.26 %     |
+| 3          | 0.000032             | 0.002374              | 0.90 %        | 1.53 %     |
+| 4          | 0.000029             | 0.001563              | 0.84 %        | 1.26 %     |
+| 5          | 0.000029             | 0.002103              | 0.81 %        | 1.44 %     |
+
+### **Visualisierung der Ergebnisse**
+![Vorhersage-Testdaten](lstm_sp500_data/lstm_sp500_4.png)
+
+Die Visualisierung zeigt eine enge Übereinstimmung zwischen tatsächlichen und vorhergesagten Open-Preisen, insbesondere für die Testdaten.
+
+### **CSV-Dateien**
+Die Ergebnisse der Vorhersagen, tatsächlichen Werte und prozentualen Abweichungen wurden in folgenden Dateien gespeichert:
+- Experiment 1: `/lstm_sp500/lstm_sp500_results_1.csv`
+- Experiment 2: `/lstm_sp500/lstm_sp500_results_2.csv`
+- Experiment 3: `/lstm_sp500/lstm_sp500_results_3.csv`
+- Experiment 4: `/lstm_sp500/lstm_sp500_results_2.csv`
+- Experiment 5: `/lstm_sp500/lstm_sp500_results_5.csv`
 
 ---
 
-## 📊 **Ergebnisse**
-- Die LSTM-Vorhersagen zeigen eine enge Übereinstimmung mit den tatsächlichen Open-Preisen.
-- Die visuelle Darstellung verdeutlicht die Fähigkeit des Modells, kurz- und langfristige Muster zu erkennen.
-
-**Dateien:**
-- 📊 **lstm_sp500.png:** Tatsächliche vs. vorhergesagte Open-Preise
-- 📄 **vorhersagen.csv:** Enthält tatsächliche und vorhergesagte Open-Preise mit Datumsangaben
-
+## 🔧 **Verbesserungspotenzial**
+- Integration zusätzlicher Merkmale wie makroökonomischer Indikatoren oder Sektordaten des S&P 500
