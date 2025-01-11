@@ -1,84 +1,63 @@
 # 📊 SP500 Schlusskurs-Vorhersage mit LSTM und RNN
 
 ## Kurzbeschreibung
-Dieses Teilprojekt beschäftigt sich mit der Vorhersage von SP500-Schlusskursen unter Verwendung 
-von LSTM (Long Short-Term Memory) und RNN (Recurrent Neural Network) Modellen. Es stellt den Anfang 
-eines größeren Projekts dar, das sich mit Zeitreihenprognosen zur Finanzdatenanalyse beschäftigt.
+Dieses Experiment untersucht die Vorhersage des SP500-Schlusskurses mit zwei neuronalen Netzwerkarchitekturen: LSTM und RNN. 
+Es werden historische Daten verwendet, um Modelle zu trainieren und deren Vorhersageleistung zu bewerten.
 
 ---
 
 ## 📅 Datenerfassung
-Die historischen SP500-Daten stammen aus einer CSV-Datei namens `SP500_Index_Historical_Data.csv`. 
-Sie enthält tägliche Aktieninformationen, darunter:
-
-- **Datum**
-- **Eröffnungskurs**
-- **Höchstkurs**
-- **Tiefstkurs**
-- **Schlusskurs**
-- **Handelsvolumen**
-
-Der Datensatz umfasst den Zeitraum von **1994 bis 2024**, wobei:
-- **Trainingsdaten:** 1994–2015
-- **Testdaten:** 2016–2024
+Die Daten stammen aus einer historischen SP500-Datenbank. Sie enthalten tägliche Informationen wie Öffnungs-, Hoch-, Tief- und Schlusskurse sowie Volumina.
 
 ---
 
 ## 📊 Merkmale
-Die folgenden Merkmale wurden extrahiert und mithilfe von `MinMaxScaler` skaliert:
-
-- **Eröffnungskurs (Open):** Eröffnungspreis des Index
-- **Höchstkurs (High):** Höchstpreis des Index während des Tages
-- **Tiefstkurs (Low):** Tiefstpreis des Index während des Tages
-- **Schlusskurs (Close):** Schlusskurs des Index
-- **Handelsvolumen (Volume):** Anzahl der gehandelten Anteile
-
-**Zielvariable:**
-- **Schlusskurs (Close):** Der tägliche Schlusswert des SP500-Index
+- **Eingabedaten:** Öffnungskurse, Hochs, Tiefs, Schlusskurse, Volumen.
+- **Zieldaten:** Schlusskurse.
+- Die Daten wurden mit einem `MinMaxScaler` auf den Bereich [0, 1] skaliert.
 
 ---
 
 ## 🛠️ Modellarchitektur
 
-### LSTM-Modell:
-- **Parameter:** 5 (Open, High, Low, Close, Volume)
-- **Hidden-Size:** 128
-- **Anzahl der Schichten:** 4
-- **Dropout:** 0.3
-- **Bidirektional:** Ja
-- **Verlustfunktion:** SmoothL1Loss
-- **Optimierer:** Adam
-- **Lernratenplaner:** StepLR
+### LSTM (Long Short-Term Memory)
+- **Input Layer:** Ein einzelnes Merkmal.
+- **Hidden Layer:** 1 LSTM-Schicht mit 50 Einheiten.
+- **Output Layer:** Eine vollständig verbundene Schicht.
 
-### RNN-Modell:
-- **Parameter:** 5
-- **Hidden-Size:** 64
-- **Anzahl der Schichten:** 4
-- **Verlustfunktion:** MSELoss
-- **Optimierer:** Adam
+### RNN (Recurrent Neural Network)
+- **Input Layer:** Ein einzelnes Merkmal.
+- **Hidden Layer:** 1 vollständig verbundene Schicht.
+- **Output Layer:** Eine vollständig verbundene Schicht.
 
 ---
 
 ## 📈 Leistungskriterien
-- **Trainingsverlust:** Über die Epochen hinweg überwacht
-- **Testverlust (MSE):** Bewertet die Modellleistung auf unbekannten Daten
-- **Visualisierung:** Prognostizierte vs. tatsächliche Schlusskurse werden zur Vergleichbarkeit
-geplottet
+- **Trainings- und Validierungsverlust (MSE):** Verlust wird während des Trainings für beide Modelle überwacht.
+- **MAPE (Mean Absolute Percentage Error):** Durchschnittliche prozentuale Abweichung zwischen den tatsächlichen und vorhergesagten Schlusskursen.
 
 ---
 
 ## 🚀 Ausgangspunkt
-Als Ausgangspunkt wurde ein einfaches **RNN-Modell** implementiert. Das **LSTM-Modell** zeigte eine
-deutlich bessere Leistung bei der Erkennung langfristiger Abhängigkeiten und Reduzierung des 
-Vorhersagefehlers.
+1. **LSTM-Ergebnisse:** 
+    - Bester MAPE: 1.18%
+    - Ergebnisse gespeichert in: `lstm_sp500_results_5.csv`
+2. **RNN-Ergebnisse:**
+    - Bester MAPE: 1.98%
+    - Ergebnisse gespeichert in: `rnn_sp500_train_results_5.csv`
 
 ---
 
 ## 📊 Ergebnisse
-- Die **LSTM-Vorhersagen** zeigen eine bessere Übereinstimmung mit den tatsächlichen Aktienkursen im 
-Vergleich zum RNN.
-- Die visuelle Gegenüberstellung verdeutlicht, dass **LSTM zeitliche Abhängigkeiten effektiver abbildet**.
+### Vergleich der Modelle
+- **LSTM:** Konsistente Ergebnisse mit MAPE-Werten zwischen 1.18% und 1.54%.
+- **RNN:** Schwankendere Ergebnisse mit MAPE-Werten zwischen 1.98% und 2.78%.
+- **Empfehlung:** Das LSTM zeigt eine bessere Anpassungsfähigkeit an sequentielle Daten und ist daher für Vorhersagen besser geeignet.
 
-**Visualisierungen:**
-- `rnn_sp500.png`: Prognosen des RNN-Modells vs. tatsächliche Werte.
-- `lstm_sp500.png`: Prognosen des LSTM-Modells vs. tatsächliche Werte.
+### **Visualisierung der Ergebnisse**
+
+#### LSTM
+![LSTM Plot](lstm_sp500_data/lstm_sp500_1.png)
+
+#### RNN
+![RNN Plot](rnn_sp500_data/rnn_sp500_1.png)

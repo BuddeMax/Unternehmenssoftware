@@ -1,397 +1,325 @@
 import os
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates  # Für die Datumsformatierung
+from sklearn.preprocessing import MinMaxScaler
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from sklearn.preprocessing import MinMaxScaler
 from torch.utils.data import DataLoader, TensorDataset
-import matplotlib.pyplot as plt
 
-# ----------------------------
-# 🔧 Geräteeinrichtung
-# ----------------------------
-# Bestimmt, ob eine GPU verfügbar ist und setzt das entsprechende Gerät.
-# Dies ist wichtig für die Beschleunigung von Trainingsprozessen bei großen Modellen.
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"✅ Verwendetes Gerät: {device}")
+# =============================================================================
+# 1. Daten einlesen
+# =============================================================================
+# Ermittelt das Verzeichnis des aktuellen Skripts
+script_dir = os.path.dirname(__file__)
 
+# Erstellt den relativen Pfad zur CSV-Datei
+data_path = os.path.join(script_dir, "../shared_resources/sp500_data/SP500_Index_Historical_Data.csv")
 
-# ----------------------------
-# 📂 Dynamischer Pfad zur Datei
-# ----------------------------
-def get_file_path():
+# Überprüfen, ob die Datei existiert
+if not os.path.exists(data_path):
+    raise FileNotFoundError(f"Datei nicht gefunden unter: {data_path}")
+else:
+    print(f"Verwende Daten von: {data_path}")
+
+# Laden der Daten unter Berücksichtigung des Datumsformats
+df = pd.read_csv(data_path, parse_dates=['Date'])
+
+# Sortieren der Daten nach Datum aufsteigend und Zurücksetzen des Index
+df = df.sort_values('Date').reset_index(drop=True)
+
+# Auswahl der 'Close'-Preise für die Analyse
+close_prices = df[['Close']].values
+
+# =============================================================================
+# 2. Daten normalisieren
+# =============================================================================
+
+# Initialisierung des MinMaxScaler zur Skalierung der Daten auf den Bereich [0, 1]
+scaler = MinMaxScaler(feature_range=(0, 1))
+scaled_close = scaler.fit_transform(close_prices)
+
+# =============================================================================
+# 3. Datensätze erstellen
+# =============================================================================
+
+def create_dataset(dataset, look_back=1):
     """
-    Ermittle den Pfad zur Datendatei dynamisch.
-
-    Diese Funktion berechnet den absoluten Pfad zur CSV-Datei mit den historischen SP500-Daten,
-    indem sie das Verzeichnis der aktuellen Datei nutzt und relativ zum Projektstammverzeichnis
-    navigiert. Dies ermöglicht eine flexible Platzierung der Daten innerhalb der Projektstruktur.
-
-    Returns:
-        str: Der absolute Pfad zur Datendatei.
-
-    Raises:
-        FileNotFoundError: Wenn die Datendatei nicht am ermittelten Pfad gefunden wird.
-    """
-    # Bestimmt das Stammverzeichnis des Projekts, indem es ein Verzeichnis nach oben navigiert.
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    # Baut den vollständigen Pfad zur CSV-Datei zusammen.
-    file_path = os.path.join(project_root, "shared_resources", "sp500_data", "SP500_Index_Historical_Data.csv")
-
-    # Debug-Ausgabe: Zeigt den ermittelten Pfad an.
-    print(f"🔍 Datenpfad: {file_path}")
-
-    # Überprüft, ob die Datei existiert. Wenn nicht, wird eine Ausnahme ausgelöst.
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"❌ Datei nicht gefunden unter: {file_path}")
-    return file_path
-
-
-# ----------------------------
-# 📊 Datenvorbereitung
-# ----------------------------
-def load_data(file_path):
-    """
-    Daten laden und sortieren.
-
-    Diese Funktion liest die historischen SP500-Daten aus einer CSV-Datei, parst die Datumsangaben
-    und sortiert die Daten chronologisch. Dies ist essentiell, um sicherzustellen, dass die
-    Zeitreihenanalyse korrekt durchgeführt wird.
+    Erstellt Eingabe- und Ausgabesätze für das LSTM-Modell.
 
     Args:
-        file_path (str): Der Pfad zur CSV-Datei mit den SP500-Daten.
+        dataset (numpy.ndarray): Skalierte Close-Preise.
+        look_back (int): Anzahl der vorhergehenden Zeitpunkte als Features.
 
     Returns:
-        pd.DataFrame: Ein DataFrame mit den geladenen und sortierten Daten.
-
-    Raises:
-        pd.errors.EmptyDataError: Wenn die CSV-Datei leer ist.
-        pd.errors.ParserError: Wenn die CSV-Datei nicht korrekt formatiert ist.
+        tuple: Arrays von Eingaben (X) und Ausgaben (y).
     """
-    # Liest die CSV-Datei ein und parst die 'Date'-Spalte als Datumsobjekte.
-    data = pd.read_csv(file_path, parse_dates=['Date'])
-    # Sortiert die Daten nach dem Datum aufsteigend und setzt den Index zurück.
-    data = data.sort_values(by='Date').reset_index(drop=True)
-    return data
+    X, y = [], []
+    for i in range(len(dataset) - look_back):
+        X.append(dataset[i:(i + look_back), 0])
+        y.append(dataset[i + look_back, 0])
+    return np.array(X), np.array(y)
 
+# Anzahl der vorhergehenden Zeitpunkte, die als Features verwendet werden
+look_back = 1
 
-def split_data(data, train_start, train_end, test_start, test_end):
+# Erstellung der Eingabe- und Ausgabesätze
+X, y = create_dataset(scaled_close, look_back)
+
+# Konvertierung der Daten zu PyTorch-Tensoren für die Modellierung
+X = torch.tensor(X, dtype=torch.float32)
+y = torch.tensor(y, dtype=torch.float32)
+
+# Anpassung der Eingabedimensionen für das LSTM [Samples, Time Steps, Features]
+X = X.unsqueeze(-1)  # Fügt eine Dimension für Features hinzu
+
+# =============================================================================
+# 4. Trainings- und Testdaten aufteilen
+# =============================================================================
+
+# Bestimmung der Größe des Trainingsdatensatzes (80% der Daten)
+train_size = int(len(X) * 0.8)
+
+# Aufteilung der Daten in Trainings- und Testsets
+X_train, X_test = X[:train_size], X[train_size:]
+y_train, y_test = y[:train_size], y[train_size:]
+
+# Extraktion der zugehörigen Datumsangaben für Trainings- und Testdaten
+dates_train = df['Date'].iloc[look_back:train_size + look_back].reset_index(drop=True)
+dates_test = df['Date'].iloc[train_size + look_back:].reset_index(drop=True)
+
+# Erstellung von TensorDatasets für die Nutzung mit DataLoader
+train_dataset = TensorDataset(X_train, y_train)
+test_dataset = TensorDataset(X_test, y_test)
+
+# =============================================================================
+# 5. DataLoader erstellen
+# =============================================================================
+
+# Festlegung der Batch-Größe
+batch_size = 32
+
+# Erstellung der DataLoader für Trainings- und Testdaten
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+
+# =============================================================================
+# 6. LSTM-Modell definieren
+# =============================================================================
+
+class LSTMModel(nn.Module):
     """
-    Daten in Trainings- und Testsets aufteilen.
-
-    Diese Funktion teilt die gesamten Daten in zwei separate Datensätze:
-    - Ein Trainingsset zur Modellbildung und -anpassung.
-    - Ein Testset zur Evaluierung der Modellleistung.
-
-    Die Aufteilung erfolgt basierend auf den angegebenen Datumsbereichen, um zeitliche
-    Korrelationen und Überlappungen zu vermeiden.
-
-    Args:
-        data (pd.DataFrame): Das vollständige DataFrame mit den SP500-Daten.
-        train_start (str): Startdatum für das Trainingsset im Format 'YYYY-MM-DD'.
-        train_end (str): Enddatum für das Trainingsset im Format 'YYYY-MM-DD'.
-        test_start (str): Startdatum für das Testset im Format 'YYYY-MM-DD'.
-        test_end (str): Enddatum für das Testset im Format 'YYYY-MM-DD'.
-
-    Returns:
-        tuple: Ein Tupel bestehend aus dem Trainings- und Test-DataFrame.
-
-    Raises:
-        ValueError: Wenn die angegebenen Datumsbereiche nicht innerhalb der Daten liegen.
+    Definition eines einfachen LSTM-Modells zur Vorhersage von S&P 500 Close-Preisen.
     """
-    # Filtert die Daten für das Trainingsset basierend auf den Start- und Enddaten.
-    train = data[(data['Date'] >= train_start) & (data['Date'] <= train_end)]
-    # Filtert die Daten für das Testset basierend auf den Start- und Enddaten.
-    test = data[(data['Date'] >= test_start) & (data['Date'] <= test_end)]
-
-    # Überprüft, ob die Trainings- und Testsets nicht leer sind.
-    if train.empty:
-        raise ValueError(
-            f"Trainingsdaten sind leer. Überprüfen Sie die Trainingsdatumsbereiche: {train_start} bis {train_end}.")
-    if test.empty:
-        raise ValueError(f"Testdaten sind leer. Überprüfen Sie die Testdatumsbereiche: {test_start} bis {test_end}.")
-
-    return train, test
-
-
-def scale_data(train, test, features):
-    """
-    Daten skalieren.
-
-    Diese Funktion skaliert die angegebenen Merkmale der Trainings- und Testdaten auf einen
-    Bereich zwischen 0 und 1 unter Verwendung des MinMaxScaler. Skalierung ist ein wichtiger
-    Schritt in der Datenvorverarbeitung, um sicherzustellen, dass alle Features den gleichen
-    Einfluss auf das Modell haben.
-
-    Args:
-        train (pd.DataFrame): Das Trainings-DataFrame.
-        test (pd.DataFrame): Das Test-DataFrame.
-        features (list): Liste der zu skalierenden Merkmale.
-
-    Returns:
-        tuple: Skalierte Trainingsdaten, skalierte Testdaten und der verwendete Scaler.
-    """
-    # Initialisiert den MinMaxScaler, der die Daten in den Bereich [0, 1] skaliert.
-    scaler = MinMaxScaler()
-    # Passt den Scaler an die Trainingsdaten an und transformiert diese.
-    train_scaled = scaler.fit_transform(train[features])
-    # Transformiert die Testdaten basierend auf dem im Trainingsset angepassten Scaler.
-    test_scaled = scaler.transform(test[features])
-    return train_scaled, test_scaled, scaler
-
-
-def create_sequences(data, seq_length, feature_index=3):
-    """
-    Sequenzen und Labels erstellen.
-
-    Diese Funktion erstellt aus den skalisierten Daten Sequenzen fester Länge, die als
-    Eingaben für das LSTM-Modell dienen, sowie die zugehörigen Labels, die die zukünftigen
-    Werte repräsentieren, die vorhergesagt werden sollen.
-
-    Args:
-        data (np.ndarray): Das skalierte Datenarray.
-        seq_length (int): Die Länge jeder Sequenz (Anzahl der Zeitschritte).
-        feature_index (int, optional): Der Index des Features, das als Label verwendet wird.
-            Standard ist 3, was dem 'Close'-Preis entspricht.
-
-    Returns:
-        tuple: Ein Tupel bestehend aus den Sequenzen und den Labels.
-
-    Raises:
-        IndexError: Wenn der angegebene feature_index außerhalb der Datenmatrix liegt.
-    """
-    sequences = []
-    labels = []
-    for i in range(len(data) - seq_length):
-        # Extrahiert eine Sequenz von seq_length Zeitpunkten.
-        sequences.append(data[i:i + seq_length])
-        try:
-            # Extrahiert das Label, das den 'Close'-Preis nach der Sequenz darstellt.
-            labels.append(data[i + seq_length, feature_index])  # 'Close' ist an Index 3
-        except IndexError:
-            raise IndexError(
-                f"feature_index {feature_index} ist außerhalb der Datenmatrix mit {data.shape[1]} Features.")
-    return np.array(sequences), np.array(labels)
-
-
-# ----------------------------
-# 🤖 LSTM-Modell
-# ----------------------------
-class StockLSTM(nn.Module):
-    """
-    Optimiertes LSTM-Modell für Aktienvorhersagen.
-
-    Dieses Modell verwendet ein bidirektionales LSTM mit mehreren Schichten und Dropout zur
-    Vorhersage der zukünftigen Schlusskurse des SP500-Index. Durch die Bidirektionalität kann
-    das Modell sowohl vergangene als auch zukünftige Kontextinformationen nutzen, was die
-    Vorhersagegenauigkeit verbessern kann.
-
-    Attributes:
-        lstm (nn.LSTM): Das LSTM-Modul, das die Sequenzdaten verarbeitet.
-        fc (nn.Linear): Die vollverbundene Schicht zur Ausgabe der finalen Vorhersage.
-    """
-
-    def __init__(self, input_size, hidden_size, output_size, num_layers=3, dropout=0.3):
+    def __init__(self, input_size=1, hidden_size=50, num_layers=1, output_size=1):
         """
-        Initialisiert das StockLSTM-Modell.
+        Initialisierung des LSTM-Modells.
 
         Args:
-            input_size (int): Die Anzahl der Eingangsmerkmale (Features) pro Zeitschritt.
-            hidden_size (int): Die Anzahl der Neuronen in den LSTM-Schichten.
-            output_size (int): Die Anzahl der Ausgangsmerkmale (in diesem Fall 1 für den 'Close'-Preis).
-            num_layers (int, optional): Die Anzahl der LSTM-Schichten. Mehr Schichten können komplexere Muster lernen.
-                Standard ist 3.
-            dropout (float, optional): Die Dropout-Rate zur Vermeidung von Überanpassung. Dropout deaktiviert zufällig
-                einen Teil der Neuronen während des Trainings. Standard ist 0.3.
+            input_size (int): Anzahl der Eingabe-Features.
+            hidden_size (int): Anzahl der LSTM-Einheiten im versteckten Zustand.
+            num_layers (int): Anzahl der LSTM-Schichten.
+            output_size (int): Anzahl der Ausgabewerte.
         """
-        super(StockLSTM, self).__init__()
-        # Initialisiert das LSTM-Modul mit den angegebenen Parametern.
-        # batch_first=True bedeutet, dass die Eingaben die Form (Batch, Sequenz, Feature) haben.
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers,
-                            batch_first=True, bidirectional=True, dropout=dropout)
-        # Die vollverbundene Schicht transformiert die LSTM-Ausgabe in die gewünschte Ausgabegröße.
-        # Da das LSTM bidirektional ist, wird die versteckte Größe mit 2 multipliziert.
-        self.fc = nn.Linear(hidden_size * 2, output_size)  # *2 wegen Bidirektionalität
+        super(LSTMModel, self).__init__()
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+
+        # LSTM-Schicht
+        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
+
+        # Voll verbundene Schicht zur Ausgabe
+        self.fc = nn.Linear(hidden_size, output_size)
 
     def forward(self, x):
         """
-        Führt eine Vorwärtsdurchführung durch.
-
-        Diese Methode definiert, wie die Eingabedaten durch das Netzwerk fließen.
+        Vorwärtsdurchlauf des Modells.
 
         Args:
-            x (torch.Tensor): Die Eingabesequenz mit der Form (Batch, Sequenz, Feature).
+            x (torch.Tensor): Eingabedaten mit Form [Batch, Time Steps, Features].
 
         Returns:
-            torch.Tensor: Die vorhergesagten Werte mit der Form (Batch, Output_Size).
+            torch.Tensor: Modellvorhersagen.
         """
-        # Durchläuft die Eingabe durch das LSTM-Modul.
-        out, _ = self.lstm(x)
-        # Extrahiert die Ausgabe des letzten Zeitschritts jeder Sequenz.
-        # Dies repräsentiert die aggregierte Information der gesamten Sequenz.
-        out = self.fc(out[:, -1, :])  # Nur die letzte Zeitschritt-Ausgabe verwenden
+        # Initialisierung der versteckten und Zellzustände mit Nullen
+        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+
+        # Durchlauf durch die LSTM-Schicht
+        out, _ = self.lstm(x, (h0, c0))  # out: [Batch, Time Steps, Hidden Size]
+
+        # Auswahl der letzten Zeitschritt-Ausgabe
+        out = out[:, -1, :]  # [Batch, Hidden Size]
+
+        # Durchlauf durch die voll verbundene Schicht
+        out = self.fc(out)  # [Batch, Output Size]
         return out
 
+# =============================================================================
+# 7. Gerät (CPU/GPU) konfigurieren
+# =============================================================================
 
-# ----------------------------
-# 📈 Visualisierung der Ergebnisse
-# ----------------------------
-def plot_results(dates, actual, predicted):
-    """
-    Ergebnisse plotten.
+# Auswahl des Geräts: GPU, falls verfügbar, ansonsten CPU
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Verwende Gerät: {device}")
 
-    Diese Funktion visualisiert die tatsächlichen und vorhergesagten Schlusskurse des SP500-Index
-    über die Testperiode. Dies ermöglicht eine visuelle Bewertung der Modellleistung.
+# =============================================================================
+# 8. Modell, Verlustfunktion und Optimierer initialisieren
+# =============================================================================
 
-    Args:
-        dates (pd.Series): Die Datumsangaben für die Testdaten.
-        actual (list): Die tatsächlichen Schlusskurse (normalisiert).
-        predicted (list): Die vorhergesagten Schlusskurse (normalisiert).
+# Erstellung einer Instanz des LSTM-Modells und Übertragung auf das gewählte Gerät
+model = LSTMModel().to(device)
 
-    Raises:
-        ValueError: Wenn die Längen der Listen dates, actual und predicted nicht übereinstimmen.
-    """
-    # Überprüft, ob alle Eingabelisten die gleiche Länge haben.
-    if not (len(dates) == len(actual) == len(predicted)):
-        raise ValueError("Die Längen von dates, actual und predicted müssen übereinstimmen.")
+# Definition der Verlustfunktion (Mean Squared Error) und des Optimierers (Adam)
+criterion = nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    plt.figure(figsize=(14, 7))
-    # Plot der tatsächlichen Werte.
-    plt.plot(dates, actual, label='Tatsächliche Werte', alpha=0.7)
-    # Plot der vorhergesagten Werte.
-    plt.plot(dates, predicted, label='Vorhersagen', alpha=0.7)
-    plt.xlabel('Datum')
-    plt.ylabel('SP500 Schlusskurs (normalisiert)')
-    plt.title('Tatsächliche vs. Vorhergesagte Werte (normalisiert)')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+# =============================================================================
+# 9. Modell trainieren
+# =============================================================================
 
+# Anzahl der Trainings-Epochen
+num_epochs = 50
 
-# ----------------------------
-# 🚀 Hauptfunktion
-# ----------------------------
-def main():
-    """
-    Hauptfunktion zur Ausführung des gesamten Prozesses.
+for epoch in range(num_epochs):
+    model.train()  # Setzt das Modell in den Trainingsmodus
+    epoch_loss = 0  # Initialisierung der kumulierten Verlustfunktion
 
-    Dieser Prozess umfasst:
-        1. Ermitteln des Dateipfads zur Datenquelle.
-        2. Laden und Sortieren der Daten.
-        3. Aufteilen der Daten in Trainings- und Testsets.
-        4. Skalieren der Daten, um die Modellkonvergenz zu verbessern.
-        5. Erstellen von Sequenzen und zugehörigen Labels für das LSTM-Modell.
-        6. Umwandeln der Daten in Tensoren und Erstellen von DataLoadern für effizientes Batch-Training.
-        7. Definieren des LSTM-Modells, der Verlustfunktion und des Optimierers.
-        8. Training des Modells über eine festgelegte Anzahl von Epochen.
-        9. Evaluierung des Modells auf den Testdaten und Visualisierung der Ergebnisse.
-    """
-    # Schritt 1: Dynamischen Pfad zur Datei definieren
-    file_path = get_file_path()
+    # Durchlauf durch alle Batches im Trainings-DataLoader
+    for X_batch, y_batch in train_loader:
+        # Übertragung der Daten auf das gewählte Gerät
+        X_batch = X_batch.to(device)
+        y_batch = y_batch.to(device)
 
-    # Schritt 2: Daten laden und sortieren
-    data = load_data(file_path)
+        # Vorwärtsdurchlauf: Berechnung der Vorhersagen
+        outputs = model(X_batch)
+        loss = criterion(outputs.squeeze(), y_batch)  # Berechnung des Verlusts
 
-    # Schritt 3: Daten in Trainings- und Testsets aufteilen
-    train_data, test_data = split_data(data, '1994-01-01', '2015-12-31', '2016-01-01', '2024-12-31')
+        # Rückwärtsdurchlauf und Optimierung
+        optimizer.zero_grad()  # Rücksetzen der Gradienten
+        loss.backward()        # Berechnung der Gradienten
+        optimizer.step()       # Aktualisierung der Modellparameter
 
-    # Schritt 4: Features definieren und skalieren
-    features = ['Open', 'High', 'Low', 'Close', 'Volume']
-    train_scaled, test_scaled, scaler = scale_data(train_data, test_data, features)
+        # Akkumulierung des Verlusts
+        epoch_loss += loss.item() * X_batch.size(0)
 
-    # Schritt 5: Sequenzen erstellen
-    seq_length = 20  # Anzahl der Zeitschritte pro Sequenz
-    X_train, y_train = create_sequences(train_scaled, seq_length)
-    X_test, y_test = create_sequences(test_scaled, seq_length)
+    # Durchschnittlicher Verlust über den gesamten Trainingsdatensatz
+    epoch_loss /= len(train_loader.dataset)
 
-    # Schritt 6: Tensor-Datensätze erstellen und DataLoader verwenden
-    batch_size = 64  # Anzahl der Samples pro Batch
-
-    # Wandelt die numpy-Arrays in PyTorch-Tensoren um und erstellt TensorDatasets.
-    train_dataset = TensorDataset(torch.tensor(X_train, dtype=torch.float32),
-                                  torch.tensor(y_train, dtype=torch.float32).unsqueeze(1))
-    test_dataset = TensorDataset(torch.tensor(X_test, dtype=torch.float32),
-                                 torch.tensor(y_test, dtype=torch.float32).unsqueeze(1))
-
-    # Erstellt DataLoader für effizientes Batch-Training und -Testen.
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
-
-    # Schritt 7: Modell, Verlustfunktion und Optimierer definieren
-    input_size = len(features)  # Anzahl der Eingangsmerkmale
-    hidden_size = 128  # Anzahl der Neuronen in den LSTM-Schichten
-    output_size = 1  # Anzahl der Ausgangsmerkmale (1 für 'Close')
-    num_layers = 4  # Anzahl der LSTM-Schichten
-    dropout = 0.3  # Dropout-Rate
-
-    # Initialisiert das LSTM-Modell und verschiebt es auf das festgelegte Gerät (CPU/GPU).
-    model = StockLSTM(input_size, hidden_size, output_size, num_layers, dropout).to(device)
-
-    # Definiert die Verlustfunktion. SmoothL1Loss ist weniger empfindlich gegenüber Ausreißern als MSELoss.
-    criterion = nn.SmoothL1Loss()
-
-    # Definiert den Optimierer. Adam ist ein weit verbreiteter Optimierer, der adaptiv die Lernrate anpasst.
-    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
-
-    # Definiert einen Lernraten-Scheduler, der die Lernrate alle 10 Epochen um den Faktor 0.5 reduziert.
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5)
-
-    # Schritt 8: Training des Modells
-    num_epochs = 100  # Gesamtanzahl der Trainingsdurchläufe
-
-    for epoch in range(1, num_epochs + 1):
-        model.train()  # Setzt das Modell in den Trainingsmodus (aktiviert Dropout, BatchNorm etc.)
-        epoch_loss = 0.0  # Initialisiert den Verlust für die aktuelle Epoche
-
-        # Iteriert über alle Batches im Trainingsloader
-        for X_batch, y_batch in train_loader:
-            # Verschiebt die Daten auf das festgelegte Gerät (CPU/GPU)
-            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
-
-            optimizer.zero_grad()  # Setzt die Gradienten des Optimierers zurück
-            outputs = model(X_batch)  # Führt eine Vorwärtsdurchführung durch
-            loss = criterion(outputs, y_batch)  # Berechnet den Verlust
-            loss.backward()  # Führt die Rückwärtsdurchführung durch (Backpropagation)
-            optimizer.step()  # Aktualisiert die Modellgewichte
-
-            epoch_loss += loss.item() * X_batch.size(0)  # Summiert den Verlust über alle Samples
-
-        scheduler.step()  # Aktualisiert die Lernrate gemäß dem Scheduler
-        avg_loss = epoch_loss / len(train_loader.dataset)  # Durchschnittlicher Verlust pro Sample
-
-        # Gibt den Verlust alle 10 Epochen und in der ersten Epoche aus.
-        if epoch % 10 == 0 or epoch == 1:
-            print(f"Epoch {epoch}/{num_epochs}, Loss: {avg_loss:.6f}")
-
-    # Schritt 9: Testen des Modells und Visualisierung der Ergebnisse
-    model.eval()  # Setzt das Modell in den Evaluationsmodus (deaktiviert Dropout etc.)
-    predictions = []  # Liste zur Speicherung der Vorhersagen
-    actuals = []  # Liste zur Speicherung der tatsächlichen Werte
-
-    with torch.no_grad():  # Deaktiviert die Gradientenberechnung für effizienteres Testen
+    # Validierungsphase (Evaluation des Modells auf Testdaten)
+    model.eval()  # Setzt das Modell in den Evaluationsmodus
+    with torch.no_grad():  # Deaktiviert die Berechnung der Gradienten
+        val_loss = 0
         for X_batch, y_batch in test_loader:
-            X_batch = X_batch.to(device)  # Verschiebt die Eingabedaten auf das Gerät
-            preds = model(
-                X_batch).cpu().numpy()  # Führt eine Vorhersage durch und verschiebt die Ergebnisse zurück auf die CPU
-            predictions.extend(preds.flatten())  # Fügt die Vorhersagen zur Liste hinzu
-            actuals.extend(y_batch.numpy().flatten())  # Fügt die tatsächlichen Werte zur Liste hinzu
+            # Übertragung der Daten auf das gewählte Gerät
+            X_batch = X_batch.to(device)
+            y_batch = y_batch.to(device)
 
-    # Extrahiert die entsprechenden Datumsangaben für die Testperiode, abzüglich der Sequenzlänge.
-    test_dates = test_data['Date'].iloc[seq_length:].reset_index(drop=True)
+            # Vorwärtsdurchlauf: Berechnung der Vorhersagen
+            outputs = model(X_batch)
+            loss = criterion(outputs.squeeze(), y_batch)  # Berechnung des Verlusts
 
-    # Visualisiert die tatsächlichen vs. vorhergesagten Werte.
-    plot_results(test_dates, actuals, predictions)
+            # Akkumulierung des Validierungsverlusts
+            val_loss += loss.item() * X_batch.size(0)
 
+        # Durchschnittlicher Verlust über den gesamten Testdatensatz
+        val_loss /= len(test_loader.dataset)
 
-# ----------------------------
-# 🔑 Einstiegspunkt
-# ----------------------------
-if __name__ == "__main__":
-    """
-    Der Einstiegspunkt des Skripts.
+    # Ausgabe des Trainings- und Validierungsverlusts alle 10 Epochen und in der ersten Epoche
+    if (epoch + 1) % 10 == 0 or epoch == 0:
+        print(f"Epoch [{epoch + 1}/{num_epochs}], Training Loss: {epoch_loss:.6f}, Validation Loss: {val_loss:.6f}")
 
-    Wenn dieses Skript direkt ausgeführt wird, startet es die Hauptfunktion.
-    Dies ermöglicht es, den Code sowohl als Modul zu importieren als auch direkt auszuführen.
-    """
-    main()
+# =============================================================================
+# 10. Vorhersagen treffen
+# =============================================================================
+
+model.eval()  # Setzt das Modell in den Evaluationsmodus
+with torch.no_grad():  # Deaktiviert die Berechnung der Gradienten
+    # Vorhersage auf den Trainingsdaten
+    train_preds = model(X_train.to(device)).cpu().numpy()
+    # Vorhersage auf den Testdaten
+    test_preds = model(X_test.to(device)).cpu().numpy()
+
+# =============================================================================
+# 11. Rückskalieren der Vorhersagen
+# =============================================================================
+
+# Rücktransformation der normalisierten Vorhersagen auf die ursprüngliche Skala
+train_preds = scaler.inverse_transform(train_preds)
+y_train_actual = scaler.inverse_transform(y_train.numpy().reshape(-1, 1))
+test_preds = scaler.inverse_transform(test_preds)
+y_test_actual = scaler.inverse_transform(y_test.numpy().reshape(-1, 1))
+
+# =============================================================================
+# 12. Prozentuale Abweichung berechnen
+# =============================================================================
+
+# Berechnung der prozentualen Abweichung für jeden Testdatenpunkt
+percentage_deviation = ((test_preds.flatten() - y_test_actual.flatten()) / y_test_actual.flatten()) * 100
+
+# =============================================================================
+# 13. Mean Absolute Percentage Error (MAPE) berechnen
+# =============================================================================
+
+# Berechnung des durchschnittlichen absoluten prozentualen Fehlers
+mape = np.mean(np.abs(percentage_deviation))
+print(f"Mean Absolute Percentage Error (MAPE) der Testdaten: {mape:.2f}%")
+
+# =============================================================================
+# 14. Ergebnisse visualisieren
+# =============================================================================
+
+plt.figure(figsize=(14, 7))
+
+# Plot der tatsächlichen Testdaten
+plt.plot(dates_test, y_test_actual.flatten(), label='Tatsächliche Testdaten', color='blue')
+
+# Plot der vorhergesagten Testdaten
+plt.plot(dates_test, test_preds.flatten(), label='Vorhersage Testdaten', color='orange')
+
+# Hinzufügen von Beschriftungen und Titel
+plt.xlabel('Datum')
+plt.ylabel('Close Preis')
+plt.title('LSTM Vorhersage des S&P 500 Close Preises (nur Testdaten)')
+
+# Hinzufügen einer Legende
+plt.legend()
+
+# Anzeige des Plots
+plt.show()
+
+# =============================================================================
+# 15. CSV mit Vorhersagen, tatsächlichen Werten und prozentualer Abweichung erstellen
+# =============================================================================
+
+# Erstellung eines DataFrames für die Trainingsvorhersagen
+train_df = pd.DataFrame({
+    'Date': dates_train,
+    'Actual_Close': y_train_actual.flatten(),
+    'Predicted_Close': train_preds.flatten()
+})
+
+# Erstellung eines DataFrames für die Testvorhersagen inklusive prozentualer Abweichung
+test_df = pd.DataFrame({
+    'Date': dates_test,
+    'Actual_Close': y_test_actual.flatten(),
+    'Predicted_Close': test_preds.flatten(),
+    'Percentage_Deviation': percentage_deviation  # Hinzufügen der prozentualen Abweichung
+})
+
+# Kombination der Trainings- und Testdaten in einem vollständigen DataFrame
+full_df = pd.concat([train_df, test_df], ignore_index=True)
+
+# Optional: Sortieren des vollständigen DataFrames nach Datum
+full_df = full_df.sort_values('Date').reset_index(drop=True)
+
+# Pfad zur Ausgabe-CSV-Datei
+output_path = 'lstm_sp500_data/lstm_sp500_results_5.csv'
+
+# Speicherung des vollständigen DataFrames als CSV-Datei ohne den Index
+full_df.to_csv(output_path, index=False)
+
+# Ausgabe einer Bestätigungsmeldung
+print(f"CSV-Datei mit den Vorhersagen, tatsächlichen Werten und prozentualen Abweichungen wurde unter '{output_path}' gespeichert.")
+print(f"Mean Absolute Percentage Error (MAPE) der Testdaten: {mape:.2f}%")

@@ -85,7 +85,7 @@ class BollingerBands:
             output_path.mkdir(parents=True, exist_ok=True)
 
             # Ergebnisse speichern
-            output_file = output_path / "bollinger_bands.csv"
+            output_file = output_path / "bollinger_bands_2.csv"
             df.to_csv(output_file, index=False)
 
             print(f"Bollinger-Bänder wurden erfolgreich berechnet und in {output_file} gespeichert.")

@@ -8,8 +8,8 @@ class IndicatorDataProcessor:
     Klasse zum Einlesen der vorhandenen CSV-Dateien:
       - Final_RSI_Stats.csv
       - Final_MACD_Stats.csv
-      - Final_Bollinger_Stats.csv
-      - (optional) Bollinger_bands_touches.csv
+      - Final_Bollinger_Stats_2.csv
+      - (optional) Bollinger_bands_touches_2.csv
 
     Und zum Berechnen der erweiterten Indikatorspalten:
       - RSI: RSI_Overbought, RSI_Oversold, RSI_CrossOver_70, etc.
@@ -180,7 +180,7 @@ class IndicatorDataProcessor:
 
     def compute_bollinger_indicators(self, df, df_touches=None):
         """
-        Aus Final_Bollinger_Stats.csv werden insbesondere 'Close_bb', 'Upper_Band',
+        Aus Final_Bollinger_Stats_2.csv werden insbesondere 'Close_bb', 'Upper_Band',
         'Lower_Band' und 'Moving_Avg' genutzt, um:
          - BB_UpperBreak
          - BB_LowerBreak
@@ -189,7 +189,7 @@ class IndicatorDataProcessor:
          - BB_Squeeze (z. B. < 2% Bandbreite)
         zu berechnen.
 
-        Falls Bollinger_bands_touches.csv existiert (df_touches),
+        Falls Bollinger_bands_touches_2.csv existiert (df_touches),
         können wir das optional mergen.
         """
         required_cols = ['Upper_Band', 'Lower_Band', 'Moving_Avg']
@@ -254,7 +254,7 @@ class IndicatorDataProcessor:
     # ----------------------------------------------------
     def create_new_files(self):
         """
-        1. Sucht Final_MACD_Stats.csv, Final_RSI_Stats.csv, Final_Bollinger_Stats.csv
+        1. Sucht Final_MACD_Stats.csv, Final_RSI_Stats.csv, Final_Bollinger_Stats_2.csv
            (ggf. bollinger_bands_touches.csv) im Projektverzeichnis.
         2. Lädt DataFrames und berechnet die neuen Indikatorspalten.
         3. Legt 'abgespeckte' DataFrames mit nur 'Date' + neu berechneten Spalten an.
@@ -309,7 +309,7 @@ class IndicatorDataProcessor:
         # --- Bollinger ---
         bb_file = self.find_csv_file("Final_Bollinger_Stats")
         if bb_file is None:
-            print("Keine Bollinger-Quelldatei (Final_Bollinger_Stats.csv) gefunden.")
+            print("Keine Bollinger-Quelldatei (Final_Bollinger_Stats_2.csv) gefunden.")
         else:
             print(f"Bollinger-Datei gefunden: {bb_file}")
             bb_df = self.load_csv(bb_file)

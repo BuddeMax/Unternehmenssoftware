@@ -29,7 +29,7 @@ def load_data(file_name):
 
 def main():
     # 1. Daten laden
-    df_bbands = load_data('bollinger_bands.csv')  # Enthält: Date, Close, Moving_Avg, Upper_Band, Lower_Band
+    df_bbands = load_data('bollinger_bands_2.csv')  # Enthält: Date, Close, Moving_Avg, Upper_Band, Lower_Band
     df_sp500 = load_data('SP500_Index_Historical_Data.csv')  # Enthält: Date, Open, High, Low, Close, Volume
 
     # 2. Mergen beider DataFrames (auf 'Date'), um spätere Nutzung der SP500-Daten zu ermöglichen
