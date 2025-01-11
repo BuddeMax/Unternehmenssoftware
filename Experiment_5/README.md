@@ -89,12 +89,14 @@ Die Ergebnisse jeder Versuchskombination wurden in separaten CSV-Dateien gespeic
 
 ## 📊 Visualisierung der Ergebnisse
 
-
+### RSI:
 ![RSI Plot](lstm_sp500_data/rsi/lstm_sp500_rsi_1.png)
 
-![RSI Plot](lstm_sp500_data/macd/lstm_sp500_macd_1.png)
+### MACD:
+![MACD Plot](lstm_sp500_data/macd/lstm_sp500_macd_1.png)
 
-![RSI Plot](lstm_sp500_data/bb/lstm_sp500_bb_1.png)
+### Bollinger Bands:
+![BB Plot](lstm_sp500_data/bb/lstm_sp500_bb_1.png)
 
 ---
 

@@ -54,3 +54,10 @@ Die Daten stammen aus einer historischen SP500-Datenbank. Sie enthalten täglich
 - **RNN:** Schwankendere Ergebnisse mit MAPE-Werten zwischen 1.98% und 2.78%.
 - **Empfehlung:** Das LSTM zeigt eine bessere Anpassungsfähigkeit an sequentielle Daten und ist daher für Vorhersagen besser geeignet.
 
+### **Visualisierung der Ergebnisse**
+
+#### LSTM
+![LSTM Plot](lstm_sp500_data/lstm_sp500_1.png)
+
+#### RNN
+![RNN Plot](rnn_sp500_data/rnn_sp500_1.png)

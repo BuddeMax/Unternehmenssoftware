@@ -77,7 +77,7 @@ Hier sind die Ergebnisse von fünf Modell-Durchläufen zusammengefasst:
 | 5          | 0.000029             | 0.002103              | 0.81 %        | 1.44 %     |
 
 ### **Visualisierung der Ergebnisse**
-![Vorhersage-Testdaten](lstm_sp500_data/lstm_sp500_4.png)
+![LSTM Plot](lstm_sp500_data/lstm_sp500_1.png)
 
 Die Visualisierung zeigt eine enge Übereinstimmung zwischen tatsächlichen und vorhergesagten Open-Preisen, insbesondere für die Testdaten.
 
