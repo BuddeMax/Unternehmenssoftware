@@ -13,7 +13,7 @@ class StatisticalAnalyzer:
       - Pearson's r für kontinuierliche Indikatoren
       - Point-Biserial Korrelation für binäre Indikatoren
       - Spearman's rho für ordinal skalierte Indikatoren
-      - Mutual Information für alle Indikatoren
+      - Normalisierte Mutual Information für alle Indikatoren
     """
 
     def __init__(self, project_root, export_csv=False, export_path='statistical_results.csv'):
@@ -113,10 +113,10 @@ class StatisticalAnalyzer:
     def analyze_correlations(self):
         """
         Berechnet je Spalte die relevanten statistischen Maße:
-         - Binär  => Point-Biserial Correlation + Mutual Information
-         - Ordinal => Spearman's Rho + (optional) Pearson's r + Mutual Information
-         - Kontinuierlich => Pearson's r + Spearman's Rho + Mutual Information
-         - Andere => Spearman's Rho + Mutual Information
+         - Binär  => Point-Biserial Correlation + Normalisierte Mutual Information
+         - Ordinal => Spearman's Rho + (optional) Pearson's r + Normalisierte Mutual Information
+         - Kontinuierlich => Pearson's r + Spearman's Rho + Normalisierte Mutual Information
+         - Andere => Spearman's Rho + Normalisierte Mutual Information
         Anschließend Ausgabe als DataFrame. Export als CSV optional.
         """
         if self.combined_df is None:
@@ -137,6 +137,7 @@ class StatisticalAnalyzer:
 
         # Liste zur Aufnahme aller Berechnungsergebnisse
         results = []
+        mi_values = []  # Zur Speicherung der MI-Werte für die spätere Normalisierung
 
         # Warnungen (z. B. bei NaNs) ignorieren
         with warnings.catch_warnings():
@@ -174,17 +175,19 @@ class StatisticalAnalyzer:
                             'p-Wert': p_value_pb
                         })
 
-                        # Mutual Information (für binäre Spalte discrete_features=True)
+                        # Normalisierte Mutual Information (für binäre Spalte discrete_features=True)
                         mi = mutual_info_regression(
                             self.combined_df[[col]],
                             target,
-                            discrete_features=True
+                            discrete_features=True,
+                            random_state=0  # Für Reproduzierbarkeit
                         )[0]
+                        mi_values.append(mi)
                         results.append({
                             'Indicator': col,
                             'Typ': indicator_type,
-                            'Methode': "Mutual Information",
-                            'Koeffizient': mi,
+                            'Methode': "Normalized Mutual Information",
+                            'Koeffizient': mi,  # Temporär, wird später normalisiert
                             'p-Wert': 'N/A'
                         })
 
@@ -216,16 +219,19 @@ class StatisticalAnalyzer:
                             'p-Wert': p_pear
                         })
 
-                        # Mutual Information
+                        # Normalisierte Mutual Information
                         mi = mutual_info_regression(
                             self.combined_df[[col]],
-                            target
+                            target,
+                            discrete_features=False,
+                            random_state=0  # Für Reproduzierbarkeit
                         )[0]
+                        mi_values.append(mi)
                         results.append({
                             'Indicator': col,
                             'Typ': indicator_type,
-                            'Methode': "Mutual Information",
-                            'Koeffizient': mi,
+                            'Methode': "Normalized Mutual Information",
+                            'Koeffizient': mi,  # Temporär, wird später normalisiert
                             'p-Wert': 'N/A'
                         })
 
@@ -257,16 +263,19 @@ class StatisticalAnalyzer:
                             'p-Wert': p_spear
                         })
 
-                        # Mutual Information
+                        # Normalisierte Mutual Information
                         mi = mutual_info_regression(
                             self.combined_df[[col]],
-                            target
+                            target,
+                            discrete_features=False,
+                            random_state=0  # Für Reproduzierbarkeit
                         )[0]
+                        mi_values.append(mi)
                         results.append({
                             'Indicator': col,
                             'Typ': indicator_type,
-                            'Methode': "Mutual Information",
-                            'Koeffizient': mi,
+                            'Methode': "Normalized Mutual Information",
+                            'Koeffizient': mi,  # Temporär, wird später normalisiert
                             'p-Wert': 'N/A'
                         })
 
@@ -285,16 +294,19 @@ class StatisticalAnalyzer:
                             'p-Wert': p_spear
                         })
 
-                        # Mutual Information
+                        # Normalisierte Mutual Information
                         mi = mutual_info_regression(
                             self.combined_df[[col]],
-                            target
+                            target,
+                            discrete_features=False,
+                            random_state=0  # Für Reproduzierbarkeit
                         )[0]
+                        mi_values.append(mi)
                         results.append({
                             'Indicator': col,
                             'Typ': indicator_type,
-                            'Methode': "Mutual Information",
-                            'Koeffizient': mi,
+                            'Methode': "Normalized Mutual Information",
+                            'Koeffizient': mi,  # Temporär, wird später normalisiert
                             'p-Wert': 'N/A'
                         })
 
@@ -304,6 +316,17 @@ class StatisticalAnalyzer:
         # Nach Durchlaufen aller Spalten: DataFrame erstellen und sortieren
         results_df = pd.DataFrame(results)
         results_df.sort_values(by=['Indicator', 'Methode'], inplace=True)
+
+        # Normalisierung der Mutual Information
+        mi_max = max(mi_values) if mi_values else 1  # Verhindert Division durch Null
+        if mi_max > 0:
+            # Iteriere über alle Zeilen und normalisiere MI
+            for idx, row in results_df.iterrows():
+                if row['Methode'] == "Normalized Mutual Information":
+                    normalized_mi = row['Koeffizient'] / mi_max
+                    results_df.at[idx, 'Koeffizient'] = normalized_mi
+        else:
+            print("Maximaler Mutual Information Wert ist 0 oder nicht verfügbar. Normalisierung nicht möglich.")
 
         # Ausgabe formatieren
         pd.set_option('display.max_rows', None)

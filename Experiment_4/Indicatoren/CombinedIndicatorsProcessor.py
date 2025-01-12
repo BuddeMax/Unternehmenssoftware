@@ -4,7 +4,7 @@ import pandas as pd
 
 class CombinedIndicatorsProcessor:
     """
-    Korrigierte Klasse zum Einlesen der finalen CSV-Dateien (RSI1_final.csv, MACD1_final.csv, BollingerBands1_final.csv)
+    Klasse zum Einlesen der finalen CSV-Dateien (RSI1_final.csv, MACD1_final.csv, BollingerBands1_final.csv)
     und der historischen CSV (SP500_Index_Historical_Data_with_RSI_MACD.csv),
     um eine kombinierte CSV-Datei (CombinedIndicators1.csv) mit exakt den gewünschten Spalten zu erstellen.
     """
