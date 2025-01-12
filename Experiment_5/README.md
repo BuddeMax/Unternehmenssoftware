@@ -1,111 +1,74 @@
-# 📊 SP500 Schlusskurs-Vorhersage mit LSTM
+# 📊 SP500 Schlusskurs-Vorhersage mit LSTM und RNN
 
-## Kurzbeschreibung
-In diesem Experiment wurde die Schlusskurs-Vorhersage des S&P 500 Index unter Verwendung von LSTM-Modellen untersucht. Es wurden drei verschiedene technische Indikatoren als Features verwendet: RSI (Relative Strength Index), MACD (Moving Average Convergence Divergence) und Bollinger Bands. Ziel war es, die Vorhersagegenauigkeit der Modelle zu bewerten und die Leistung der verschiedenen Ansätze zu vergleichen.
+## 🔍 Erweiterung: Analyse der Indikatoren für statistische Bewertung
 
----
-
-## 📅 Datenerfassung
-- Historische Daten des S&P 500 Index wurden aus einer CSV-Datei geladen.
-- Die Dateien enthielten jeweils die Schlusskurse und die entsprechenden Indikatoren (RSI, MACD, Bollinger Bands).
-- Die Daten wurden nach Datum sortiert und skaliert, um sie für das Training und die Modellierung vorzubereiten.
+In diesem Abschnitt wurden die Indikatoren Bollinger Bands, MACD, RSI und Volume untersucht, um herauszufinden, welche Merkmale am besten geeignet sind, die Schlusskurse des SP500 für das LSTM-Modell vorherzusagen. Die Analyse basiert auf drei statistischen Maßen: Pearson's R, Spearman's Rho und normierte Mutual Information (NMI).
 
 ---
 
-## 📊 Merkmale
-### Verwendete technische Indikatoren:
-- **RSI (Relative Strength Index):** Ein Momentum-Indikator, der die Geschwindigkeit und Änderung von Preisbewegungen misst.
-- **MACD (Moving Average Convergence Divergence):** Ein Trendfolge-Indikator, der aus zwei gleitenden Durchschnitten besteht.
-- **Bollinger Bands:** Ein Volatilittätsindikator, der auf Basis eines einfachen gleitenden Durchschnitts erstellt wird.
+## 📑 Statistische Maße
+
+- **Normalized Mutual Information (NMI):** Misst die Informationsmenge, die ein Indikator über die Zielgröße liefert. Werte reichen von 0 (keine Abhängigkeit) bis 1 (perfekte Abhängigkeit). Besonders nützlich, um allgemeine Abhängigkeiten zu bewerten.
+- **Pearson's R:** Bewertet die lineare Abhängigkeit zwischen Indikator und Zielgröße. Werte reichen von -1 (perfekte negative Korrelation) bis +1 (perfekte positive Korrelation). Nahe 0 bedeutet keine lineare Beziehung.
+- **Spearman's Rho:** Bewertet die monotone Abhängigkeit zwischen Indikator und Zielgröße. Werte wie bei Pearson's R zwischen -1 und +1. Besonders nützlich bei nicht-linearen Beziehungen.
 
 ---
 
-## 🛠️ Modellarchitektur
-- **Modelltyp:** Long Short-Term Memory (LSTM) Netzwerk
-- **Eingabe-Features:**
-  - RSI: 2 Features (Close, RSI)
-  - MACD: 2 Features (Close, MACD)
-  - Bollinger Bands: 4 Features (Close, BB_Middle, BB_Upper, BB_Lower)
-- **Hyperparameter:**
-  - Anzahl der Epochen: Variierte zwischen 40 (RSI), 60 (MACD) und 150 (Bollinger Bands).
-  - Batch-Größe: 128
-  - Lernrate: 0.001
-  - Verlustfunktion: Mean Squared Error (MSE)
+## 📊 Ergebnisse der Analyse
+
+### **1. Bollinger Bands**
+
+| **Indikator**                  | **Statistisches Maß**  | **Koeffizient** |
+|---------------------------------|------------------------|------------------|
+| Bollinger Band Upper Breakstreak | Normalized MI (NMI)    | 0.0              |
+| Bollinger Band Upper Breakstreak | Pearson's r           | -0.0268          |
+| Bollinger Band Upper Breakstreak | Spearman's Rho        | -0.0240          |
+
+**Bedeutung:** Die Bollinger Bands zeigen keine signifikante Abhängigkeit zu den Schlusskursen. Mit einem NMI von 0.0 und niedrigen Werten für R und Rho scheint dieser Indikator wenig prädiktive Kraft für das LSTM-Modell zu besitzen.
 
 ---
 
-## 📈 Leistungskriterien
-- **Mean Absolute Percentage Error (MAPE):** Durchschnittlicher absoluter prozentualer Fehler zwischen den Vorhersagen und den tatsächlichen Schlusskursen.
-- Validierungsverlust (MSE) über die Epochen.
+### **2. MACD**
+
+| **Indikator**                  | **Statistisches Maß**  | **Koeffizient** |
+|---------------------------------|------------------------|------------------|
+| MACD                           | Normalized MI (NMI)    | 0.5804           |
+| MACD                           | Pearson's r           | 0.2782           |
+| MACD                           | Spearman's Rho        | 0.3228           |
+
+**Bedeutung:** Der MACD ist ein starker Indikator für die Schlusskursvorhersage, insbesondere durch seinen hohen NMI-Wert von 0.5804. Auch Pearson's R und Spearman's Rho zeigen moderate Abhängigkeiten, was die Relevanz dieses Indikators für das LSTM-Modell unterstützt.
 
 ---
 
-## 🚀 Ausgangspunkt
-- Die Datensätze wurden in Trainings- und Testsets (80:20) aufgeteilt.
-- Die Modelle wurden mit CPU trainiert.
+### **3. RSI**
+
+| **Indikator**                  | **Statistisches Maß**  | **Koeffizient** |
+|---------------------------------|------------------------|------------------|
+| RSI Oversold Streak            | Normalized MI (NMI)    | 0.0039           |
+| RSI Oversold Streak            | Pearson's r           | -0.0386          |
+| RSI Oversold Streak            | Spearman's Rho        | -0.0520          |
+
+**Bedeutung:** Der RSI Oversold Streak zeigt eine sehr geringe Abhängigkeit zu den Schlusskursen. Mit einem NMI von 0.0039 und negativen Werten für R und Rho scheint dieser Indikator wenig hilfreich für die Modellierung im LSTM zu sein.
 
 ---
 
-## 📊 Ergebnisse
-### Trainingsergebnisse:
-#### RSI:
-- Durchschnittliche MAPE:
-  - Versuch 1: 0.77%
-  - Versuch 2: 0.80%
-  - Versuch 3: 0.76%
-  - Versuch 4: 0.95%
-  - Versuch 5: 0.92%
+### **4. Volume**
 
-#### MACD:
-- Durchschnittliche MAPE:
-  - Versuch 1: 0.96%
-  - Versuch 2: 1.03%
-  - Versuch 3: 0.95%
-  - Versuch 4: 0.95%
-  - Versuch 5: 0.94%
+| **Indikator**                  | **Statistisches Maß**  | **Koeffizient** |
+|---------------------------------|------------------------|------------------|
+| Volume                         | Normalized MI (NMI)    | 1.0              |
+| Volume                         | Pearson's r           | 0.6885           |
+| Volume                         | Spearman's Rho        | 0.8639           |
 
-#### Bollinger Bands:
-- Durchschnittliche MAPE:
-  - Versuch 1: 0.87%
-  - Versuch 2: 0.84%
-  - Versuch 3: 0.76%
-  - Versuch 4: 1.07%
-  - Versuch 5: 0.94%
-
-### Schlussfolgerungen:
-- **RSI** und **Bollinger Bands** erzielten die niedrigste MAPE (~0.76%) in den besten Durchläufen.
-- **MACD** zeigte konsistente Ergebnisse, lag jedoch leicht über der MAPE von RSI und Bollinger Bands.
-- Die Variationen zwischen den Versuchen zeigen die Empfindlichkeit der Modelle gegenüber unterschiedlichen Initialisierungen und Trainingsbedingungen.
+**Bedeutung:** Volume ist der stärkste Indikator in dieser Analyse. Mit einem perfekten NMI von 1.0 sowie hohen Werten bei Pearson's R (0.6885) und Spearman's Rho (0.8639) liefert Volume signifikante Informationen über die Schlusskursentwicklung und ist ein unverzichtbarer Bestandteil für das LSTM-Modell.
 
 ---
 
-## 📊 Ergebnisse
-Die Ergebnisse jeder Versuchskombination wurden in separaten CSV-Dateien gespeichert, die die tatsächlichen Werte, die vorhergesagten Werte und die prozentualen Abweichungen enthalten.
+## 🎯 Bedeutung der Ergebnisse für das LSTM-Modell
 
-**Speicherorte der CSV-Dateien:**
-- RSI: `lstm_sp500/rsi/lstm_sp500_results_<n>_with_RSI.csv`
-- MACD: `lstm_sp500/macd/lstm_sp500_results_<n>_with_MACD.csv`
-- Bollinger Bands: `lstm_sp500/bb/lstm_sp500_results_with_BB_<n>.csv`
+1. **Volume** ist der wichtigste Indikator und sollte im LSTM-Modell priorisiert integriert werden. Seine hohe Informationsdichte (NMI: 1.0) und starke lineare sowie monotone Abhängigkeiten machen ihn besonders wertvoll.
+2. **MACD** liefert ebenfalls starke prädiktive Hinweise, insbesondere durch den hohen NMI-Wert (0.5804). Er kann als ergänzender Indikator verwendet werden, um zusätzliche Muster zu erkennen.
+3. **Bollinger Bands und RSI** zeigen in dieser Analyse keine signifikanten Zusammenhänge und sind für die Vorhersage weniger relevant. Sie könnten jedoch in Kombination mit anderen Indikatoren nützlich sein und sollten bei Bedarf weiter untersucht werden.
 
-## 📊 Visualisierung der Ergebnisse
-
-### RSI:
-![RSI Plot](lstm_sp500_data/rsi/lstm_sp500_rsi_1.png)
-
-### MACD:
-![MACD Plot](lstm_sp500_data/macd/lstm_sp500_macd_1.png)
-
-### Bollinger Bands:
-![BB Plot](lstm_sp500_data/bb/lstm_sp500_bb_1.png)
-
----
-
-## 🔧 Code
-Der gesamte Code für die Experimente ist in den folgenden Skripten implementiert:
-- `lstm_sp500_with_rsi.py`
-- `lstm_sp500_with_macd.py`
-- `lstm_sp500_with_bb.py`
-
-Der Code beinhaltet Schritte zur Datenvorbereitung, Modelldefinition, Training, Validierung und Visualisierung der Ergebnisse.
-
----
+### Fazit
+Die Ergebnisse dieser Analyse bieten eine klare Grundlage für die Auswahl der wichtigsten Indikatoren. Volume und MACD werden als Hauptmerkmale für das LSTM-Modell priorisiert, da sie statistisch signifikante Zusammenhänge mit den Schlusskursen aufweisen und das Potenzial haben, die Vorhersagegenauigkeit erheblich zu verbessern.
