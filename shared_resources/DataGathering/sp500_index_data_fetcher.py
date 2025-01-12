@@ -6,7 +6,7 @@ SP500_SYMBOL = "^GSPC"
 
 # Zeitraum für die Datenabfrage
 START_DATE = "1980-01-01"  # Startdatum
-END_DATE = "2024-11-27"    # Enddatum (aktuell)
+END_DATE = "2025-01-11"    # Enddatum (aktuell)
 
 # Herunterladen der historischen Daten des S&P 500
 print("Lade historische Daten des S&P 500 Index...")
@@ -29,6 +29,6 @@ else:
     sp500_filtered['Date'] = pd.to_datetime(sp500_filtered['Date'])
 
     # Speichern der gefilterten Daten in eine CSV-Datei
-    csv_filename = "SP500_Index_Historical_Data.csv"
+    csv_filename = "../sp500_data/SP500_Index_Historical_Data.csv"
     sp500_filtered.to_csv(csv_filename, index=False)
     print(f"Daten wurden erfolgreich in '{csv_filename}' gespeichert.")
