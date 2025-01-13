@@ -7,6 +7,8 @@ from sklearn.preprocessing import MinMaxScaler
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
+import joblib  # Zum Speichern und Laden von Python-Objekten
+
 
 # =============================================================================
 # 1. Daten einlesen
@@ -39,6 +41,11 @@ features = df[['Close', 'RSI']].values  # Inklusive RSI als zusätzliches Featur
 # Initialisierung des MinMaxScaler zur Skalierung der Daten auf den Bereich [0, 1]
 scaler = MinMaxScaler(feature_range=(0, 1))
 scaled_features = scaler.fit_transform(features)  # Skalieren von 'Close' und 'RSI'
+
+# Speichern des Scalers für zukünftige Vorhersagen
+scaler_path = os.path.join(script_dir, "../shared_resources/sp500_data/RSI/scaler.pkl")
+joblib.dump(scaler, scaler_path)
+print(f"Scaler wurde gespeichert unter: {scaler_path}")
 
 # =============================================================================
 # 3. Datensätze erstellen
@@ -231,6 +238,11 @@ for epoch in range(num_epochs):
     if (epoch + 1) % 10 == 0 or epoch == 0:
         print(f"Epoch [{epoch + 1}/{num_epochs}], Training Loss: {epoch_loss:.6f}, Validation Loss: {val_loss:.6f}")
 
+    # **Modell speichern nach dem Training**
+model_save_path = "lstm_sp500_model.pth"
+torch.save(model.state_dict(), model_save_path)
+print(f"Das trainierte Modell wurde erfolgreich gespeichert unter: {model_save_path}")
+
 # =============================================================================
 # 10. Vorhersagen treffen
 # =============================================================================
@@ -339,3 +351,4 @@ full_df.to_csv(output_path, index=False)
 # Ausgabe einer Bestätigungsmeldung
 print(f"CSV-Datei mit den Vorhersagen, tatsächlichen Werten und prozentualen Abweichungen wurde unter '{output_path}' gespeichert.")
 print(f"Mean Absolute Percentage Error (MAPE) der Testdaten: {mape:.2f}%")
+
