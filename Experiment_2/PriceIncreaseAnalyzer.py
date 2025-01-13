@@ -89,8 +89,7 @@ class PriceIncreaseAnalyzer:
             self.df.sort_values('Date', inplace=True)
             self.df.reset_index(drop=True, inplace=True)
 
-            # Filtern der Daten ab dem 1994-01-01
-            start_date = pd.Timestamp('1994-01-01')
+            start_date = pd.Timestamp('1980-01-01')
             self.df = self.df[self.df['Date'] >= start_date].copy()
 
             # Identifizieren des ersten vollständigen Datensatzes (High, Low und Close nicht 0.0)
