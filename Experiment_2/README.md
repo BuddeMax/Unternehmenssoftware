@@ -95,14 +95,15 @@ Das Hauptziel dieser Analyse ist es, die Häufigkeit von steigenden und fallende
 - **Alle Tage mit vollständigen Datensätzen**: 9081 Tage  
   - **Tage mit gestiegenem Close-Kurs**: 4826 (53.15%)  
   - **Tage mit gefallenem Close-Kurs**: 4254 (46.85%)  
-![test_movement_relative.p![train_movement_relative.png](train_movement_relative.png)ng](test_movement_relative.png)
+
 
 **Analyse der S&P 500 historischen Daten - Testdaten**:
 - **Zeitraum**: 2016-01-04 bis 2024-11-26  
 - **Alle Tage mit vollständigen Datensätzen**: 2241 Tage  
   - **Tage mit gestiegenem Close-Kurs**: 1222 (54.55%)  
   - **Tage mit gefallenem Close-Kurs**: 1018 (45.45%)  
-![test_movement_relative.png](test_movement_relative.png)
+
+
 #### 🔍 Interpretation
 Die Prozentsätze der Tage mit gestiegenem Close-Kurs sind in den Trainings- und Testdaten relativ ähnlich (53.15% vs. 54.55%). Dies zeigt, dass die Trainingsdaten die Muster der Testdaten gut repräsentieren und das LSTM-Modell somit auf einer konsistenten Datenbasis trainiert wurde.
 

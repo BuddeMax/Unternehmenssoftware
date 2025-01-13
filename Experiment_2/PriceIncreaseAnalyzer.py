@@ -109,10 +109,10 @@ class PriceIncreaseAnalyzer:
             self.df_filtered['Close_Increased'] = self.df_filtered['Close'] > self.df_filtered['Previous_Close']
 
             # Aufteilen in Trainings- und Testdaten
-            train_start_date = pd.Timestamp('1994-01-01')
-            train_end_date = pd.Timestamp('2015-12-31')
-            test_start_date = pd.Timestamp('2016-01-01')
-            test_end_date = pd.Timestamp('2024-12-31')  # Annahme: letztes Datum ist 2024-12-31
+            train_start_date = pd.Timestamp('1980-01-01')
+            train_end_date = pd.Timestamp('2015-12-18')
+            test_start_date = pd.Timestamp('2015-12-19')
+            test_end_date = pd.Timestamp('2024-12-31')
 
             self.train_df = self.df_filtered[
                 (self.df_filtered['Date'] >= train_start_date) &
